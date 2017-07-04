@@ -34,6 +34,9 @@ namespace HY_MeshViewer
         Point3D[] nodes;
         int[][] faces;
         double[][] properties;
+        
+        private bool mDown;
+        private Point mLastPos;
 
         public MainWindow()
         {
@@ -41,10 +44,10 @@ namespace HY_MeshViewer
 
             /** mainViewport에 한 가지 model만 추가(동시에 여러 model 불가) */
             //this.mainViewport.Children.Add(model);
+            PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
+            camera.Transform = new Transform3DGroup();
 
             CreateAxis();
-
-            content.MouseDown += new MouseButtonEventHandler(OnViewportMouseDown);
         }
 
         /* ------------------------------------------------------------------------------------------------ */
@@ -137,6 +140,7 @@ namespace HY_MeshViewer
             return Vector3D.CrossProduct(v0, v1);
         }
 
+        /* center point 계산 */
         public Point3D GetCenter(ModelVisual3D model)
         {
             var rect3D = Rect3D.Empty;
@@ -148,6 +152,7 @@ namespace HY_MeshViewer
             return center;
         }
 
+        /* model 합쳐나감 */
         private void UnionRect(ModelVisual3D model, ref Rect3D rect3D)
         {
             for (int i = 0; i < model.Children.Count; i++)
@@ -213,35 +218,112 @@ namespace HY_MeshViewer
         {
         }
 
-        private void ZoomSliderChanged(object sender, RoutedEventArgs e)
+        private void ZoomSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            /* PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
+
+            camera.Position = new Point3D(
+                camera.Position.X - e.NewValue / 20D, camera.Position.Y - e.NewValue / 20D, camera.Position.Z - e.NewValue / 20D);*/
         }
 
         private void XSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            /* PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
 
+            camera.Position = new Point3D(
+                camera.Position.X - e.NewValue / 20D, camera.Position.Y - e.NewValue / 20D, camera.Position.Z - e.NewValue / 20D);*/
         }
 
-        private void YSliderChanged(object sender, RoutedEventArgs e)
+        private void YSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            /* PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
+
+            camera.Position = new Point3D(
+                camera.Position.X - e.NewValue / 20D, camera.Position.Y - e.NewValue / 20D, camera.Position.Z - e.NewValue / 20D);*/
         }
 
-        private void ZSliderChanged(object sender, RoutedEventArgs e)
+        private void ZSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            /* PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
+
+            camera.Position = new Point3D(
+                camera.Position.X - e.NewValue / 20D, camera.Position.Y - e.NewValue / 20D, camera.Position.Z - e.NewValue / 20D);*/
         }
 
-        private void OnViewportMouseDown(object sender, RoutedEventArgs e)
+        private void OnGridMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            label.Content = "MouseDown";
-            ClearViewport();
+            PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
+
+            camera.Position = new Point3D(
+                camera.Position.X - e.Delta / 20D, camera.Position.Y - e.Delta / 20D, camera.Position.Z - e.Delta / 20D); 
         }
 
-        private void OnViewportMouseUp(object sender, RoutedEventArgs e)
+        private void OnGridMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.LeftButton != MouseButtonState.Pressed) return;
+
+            mDown = true;
+            Point pos = Mouse.GetPosition(this);
+            mLastPos = new Point(
+                    pos.X - this.ActualWidth / 2,
+                    this.ActualHeight / 2 - pos.Y);
+            label.Content = pos;
         }
 
-        private void OnViewportMouseMove(object sender, RoutedEventArgs e)
+        private void OnGridMouseUp(object sender, MouseButtonEventArgs e)
         {
+            mDown = false;
+        }
+
+        private void OnGridMouseMove(object sender, MouseEventArgs e)
+        {
+            if (!mDown) return;
+
+            Point pos = Mouse.GetPosition(this);
+            Point actualPos = new Point(
+                    pos.X - this.ActualWidth / 2,
+                    this.ActualHeight / 2 - pos.Y);
+            double dx = actualPos.X - mLastPos.X;
+            double dy = actualPos.Y - mLastPos.Y;
+            double mouseAngle = 0;
+
+            if (dx != 0 && dy != 0)
+            {
+                mouseAngle = Math.Asin(Math.Abs(dy) /
+                    Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
+                if (dx < 0 && dy > 0) mouseAngle += Math.PI / 2;
+                else if (dx < 0 && dy < 0) mouseAngle += Math.PI;
+                else if (dx > 0 && dy < 0) mouseAngle += Math.PI * 1.5;
+            }
+            else if (dx == 0 && dy != 0)
+            {
+                mouseAngle = Math.Sign(dy) > 0 ? Math.PI / 2 : Math.PI * 1.5;
+            }
+            else if (dx != 0 && dy == 0)
+            {
+                mouseAngle = Math.Sign(dx) > 0 ? 0 : Math.PI;
+            }
+
+            double axisAngle = mouseAngle + Math.PI / 2;
+
+            Vector3D axis = new Vector3D(
+                    Math.Cos(axisAngle) * 4,
+                    Math.Sin(axisAngle) * 4, 0);
+
+            double rotation = 0.02 *
+                    Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
+            
+            PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
+            Transform3DGroup group = camera.Transform as Transform3DGroup;
+            //Transform3DGroup group = mGeometry.Transform as Transform3DGroup;
+            
+            QuaternionRotation3D r =
+                 new QuaternionRotation3D(
+                 new Quaternion(axis, rotation * 180 / Math.PI));
+
+            group.Children.Add(new RotateTransform3D(r));
+
+            mLastPos = actualPos;
         }
 
         /* ------------------------------------------------------------------------------------------------ */
@@ -360,12 +442,12 @@ namespace HY_MeshViewer
             triangle.Children.Add(CreateTriangleModel(point0, point2, point1));
 
             ModelVisual3D model = new ModelVisual3D();
+            model.Transform = new Transform3DGroup();
             model.Content = triangle;
             this.mainViewport.Children.Add(model);
 
             Point3D center = GetCenter(model);
             txtBox.Text = center.ToString();
-
         }
 
 
@@ -407,6 +489,7 @@ namespace HY_MeshViewer
 
             ModelVisual3D model = new ModelVisual3D();
             model.Content = cube;
+            model.Transform = new Transform3DGroup();
             this.mainViewport.Children.Add(model);
 
             Point3D center = GetCenter(model);
@@ -434,6 +517,7 @@ namespace HY_MeshViewer
 
             ModelVisual3D model = new ModelVisual3D();
             model.Content = topography;
+            model.Transform = new Transform3DGroup();
             this.mainViewport.Children.Add(model);
 
             Point3D center = GetCenter(model);
@@ -458,6 +542,7 @@ namespace HY_MeshViewer
 
                 ModelVisual3D model = new ModelVisual3D();
                 model.Content = brain;
+                model.Transform = new Transform3DGroup();
                 this.mainViewport.Children.Add(model);
 
                 //Point3D center = GetCenter(model);
