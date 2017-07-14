@@ -5,6 +5,8 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using _3DTools;
+using WPF.MDI;
 
 namespace HY_MeshViewer
 {
