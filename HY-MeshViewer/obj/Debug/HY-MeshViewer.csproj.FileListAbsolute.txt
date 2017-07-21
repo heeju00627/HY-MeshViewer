@@ -21,3 +21,4 @@ C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\ViewerControl.baml
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\PropertyControl.g.cs
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\PropertyControl.baml
+C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\GeneratedInternalTypeHelper.g.cs

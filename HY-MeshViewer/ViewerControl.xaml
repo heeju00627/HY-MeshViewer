@@ -5,17 +5,27 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HY_MeshViewer"
              mc:Ignorable="d" 
-             d:DesignHeight="1000" d:DesignWidth="1500">
+             d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <DockPanel>
-            <Slider Name="zoomSlider" Orientation="Vertical" Minimum="0.2" Maximum="10" ValueChanged="ZoomSliderChanged"/>
-            <Slider Name="xSlider" DockPanel.Dock="Right" Orientation="Vertical" Minimum="-180" Maximum="180" ValueChanged="XSliderChanged"/>
-            <Slider Name="ySlider" DockPanel.Dock="Bottom" Orientation="Horizontal" Minimum="-180" Maximum="180" ValueChanged="YSliderChanged"/>
-            <Slider Name="zSlider" DockPanel.Dock="Top" Orientation="Horizontal" Minimum="-180" Maximum="180" ValueChanged="ZSliderChanged"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Name="zeroRow" Height="18" />
+            <RowDefinition Name="firstRow" Height="*" />
+            <RowDefinition Name="secondRow" Height="18" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="18" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="18" />
+        </Grid.ColumnDefinitions>
+
+        <DockPanel Grid.Row="1" Grid.Column="1">
             <Grid Name="content" Background="White" MouseWheel="OnGridMouseWheel" MouseDown="OnGridMouseDown" MouseUp="OnGridMouseUp" MouseMove="OnGridMouseMove">
                 <Grid.LayoutTransform>
                     <TransformGroup>
-                        <ScaleTransform x:Name="scaleTransform"/>
+                        <ScaleTransform x:Name="scaleTransform"
+                                        ScaleX="{Binding Path=Value, ElementName=zoomSlider}"
+                                        ScaleY="{Binding Path=Value, ElementName=zoomSlider}"/>
+                        <RotateTransform x:Name="rotateTransform"/>
                     </TransformGroup>
                 </Grid.LayoutTransform>
                 <Viewport3D Name="mainViewport" ClipToBounds="True" Grid.Row="0" Grid.Column="0" d:IsHidden="True">
@@ -35,5 +45,15 @@
                 </Viewport3D>
             </Grid>
         </DockPanel>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="13,0,0,0">x</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="2" Margin="6,3,0,0">y</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="2" Margin="0,0,13,0">z</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,-6,0,0">+-</TextBlock>
+
+        <Slider Grid.Row="1" Grid.Column="0" Name="zoomSlider" ToolTipService.ToolTip="zoomSlider" Orientation="Vertical" Minimum="0.2" Value="1" Maximum="10" ValueChanged="ZoomSliderChanged"/>
+        <Slider Grid.Row="0" Grid.Column="1" Name="xSlider" ToolTipService.ToolTip="xSlider" Orientation="Horizontal" Minimum="-180" Maximum="180" ValueChanged="XSliderChanged"/>
+        <Slider Grid.Row="1" Grid.Column="2" Name="ySlider" ToolTipService.ToolTip="ySlider" Orientation="Vertical" Minimum="-180" Maximum="180" ValueChanged="YSliderChanged"/>
+        <Slider Grid.Row="2" Grid.Column="1" Name="zSlider" ToolTipService.ToolTip="zSlider" Orientation="Horizontal" Minimum="-180" Maximum="180" ValueChanged="ZSliderChanged"/>
     </Grid>
 </UserControl>

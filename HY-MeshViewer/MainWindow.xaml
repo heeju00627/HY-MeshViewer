@@ -6,11 +6,11 @@
         xmlns:mdi="clr-namespace:WPF.MDI;assembly=WPF.MDI"
         xmlns:local="clr-namespace:HY_MeshViewer"
         mc:Ignorable="d"
-        Title="HY-MeshViewer" Height="720" Width="1280"
+        Title="HY-MeshViewer" Height="720" Width="1280" MinHeight="720" MinWidth="1280"
         ResizeMode="CanResizeWithGrip">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Name="zeroRow" Height="45" />
+            <RowDefinition Name="zeroRow" Height="18" />
             <RowDefinition Name="firstRow" Height="*" />
             <RowDefinition Name="secondRow" Height="25" />
         </Grid.RowDefinitions>
@@ -23,6 +23,7 @@
             <Menu Name="MainMenu" DockPanel.Dock="Top" >    
                 <MenuItem Name="menuFile" Header="File">
                     <MenuItem Name="submenuOpen" Header="Open" Click="SubmenuOpen_Click"/>
+                    <MenuItem Name="submenuClose" Header="Close" Click="SubmenuClose_Click"/>
                     <MenuItem Name="submenuExit" Header="Exit" Click="SubmenuExit_Click"/>
                 </MenuItem>
 
@@ -38,7 +39,9 @@
                 <MenuItem Name="menuHelp" Header="Help">
                 </MenuItem>
             </Menu>
+        </DockPanel>
 
+        <DockPanel Grid.Row="1" Grid.ColumnSpan="2">
             <ToolBarTray Name="Toolbar" Visibility="Visible" DockPanel.Dock="Top">
                 <ToolBar>
                     <Button Command="Open" ToolTip="Open">
@@ -49,21 +52,27 @@
                     </Button>
                 </ToolBar>
             </ToolBarTray>
-        </DockPanel>
 
-        <DockPanel Grid.Row="1" Grid.ColumnSpan="2">
-            <mdi:MdiContainer Theme="Luna" DockPanel.Dock="Left" Name="PropertyMdiContainer" BorderBrush="Aqua" MaxWidth="200" Visibility="Visible" x:FieldModifier="public">
-            </mdi:MdiContainer>
-            <mdi:MdiContainer Theme="Luna" DockPanel.Dock="Right" Name="ViewerMdiContainer" x:FieldModifier="public">
-            </mdi:MdiContainer>
+            <local:PropertyControl x:Name="PropertyControl" Visibility="Visible" />
+            <local:ViewerControl  x:Name="ViewerControl"/>
         </DockPanel>
 
 
         <DockPanel Name="Statusbar" Visibility="Visible" Grid.Row="2" Grid.ColumnSpan="2" >
+            <DockPanel.Resources>
+                <local:ViewerControl x:Key="myDataSource"/>
+            </DockPanel.Resources>
+            <DockPanel.DataContext>
+                <Binding Source="{StaticResource myDataSource}"/>
+            </DockPanel.DataContext>
             <StatusBar DockPanel.Dock="Top">
                 <StatusBarItem>
-                    <TextBlock Name="lblCursorPosition" Text="hello"/>
-                </StatusBarItem>    
+                    <TextBlock Name="Position" Text="{Binding Path=Position}"/>
+                </StatusBarItem>
+                <Separator/>
+                <StatusBarItem>
+                    <TextBlock Name="FileName" Text="{Binding Path=FileName}"/>
+                </StatusBarItem>
             </StatusBar>
         </DockPanel>
 
