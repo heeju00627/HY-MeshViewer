@@ -7,6 +7,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="200">
     <Grid>
+        <Grid.Resources>
+            <local:ViewerControl_GL x:Key="viewerControlDataSource"/>
+        </Grid.Resources>
+        <Grid.DataContext>
+            <Binding Source="{StaticResource viewerControlDataSource}"/>
+        </Grid.DataContext>
         <StackPanel>
             <StackPanel.Background>
                 <LinearGradientBrush>
@@ -34,7 +40,14 @@
                 <CheckBox Name="wireframeCheckBox">Show Wireframe</CheckBox>
                 <Separator/>
                 <Button Name="resetButton" Click="ResetButtonClick">Reset</Button>
+                <Button Name="colorButton" Click="ColorButtonClick">Coloring</Button>
                 <Label Name="label" Height="28" Margin="0,0,0,12" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" >Label</Label>
+                <Separator />
+                <ComboBox x:Name="polygonModeComboBox" Width="100" SelectedIndex="2" SelectionChanged="comboBoxPolygonMode_SelectionChanged">
+                    <ComboBoxItem>Points</ComboBoxItem>
+                    <ComboBoxItem>Lines</ComboBoxItem>
+                    <ComboBoxItem>Polygons</ComboBoxItem>
+                </ComboBox>
             </StackPanel>
         </StackPanel>
     </Grid>

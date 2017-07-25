@@ -36,14 +36,14 @@ namespace HY_MeshViewer
         private void SubmenuOpen_Click(object sender, RoutedEventArgs e)
         {
 
-            ViewerControl.OpenFile();
+            ViewerControl_GL.OpenFile();
             
         }
 
         private void SubmenuClose_Click(object sender, RoutedEventArgs e)
         {
 
-            ViewerControl.CloseFile();
+            ViewerControl_GL.CloseFile();
 
         }
 

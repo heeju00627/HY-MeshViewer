@@ -22,9 +22,7 @@
             <Grid Name="content" Background="White" MouseWheel="OnGridMouseWheel" MouseDown="OnGridMouseDown" MouseUp="OnGridMouseUp" MouseMove="OnGridMouseMove">
                 <Grid.LayoutTransform>
                     <TransformGroup>
-                        <ScaleTransform x:Name="scaleTransform"
-                                        ScaleX="{Binding Path=Value, ElementName=zoomSlider}"
-                                        ScaleY="{Binding Path=Value, ElementName=zoomSlider}"/>
+                        <ScaleTransform x:Name="scaleTransform"/>
                         <RotateTransform x:Name="rotateTransform"/>
                     </TransformGroup>
                 </Grid.LayoutTransform>

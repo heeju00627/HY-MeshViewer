@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:mdi="clr-namespace:WPF.MDI;assembly=WPF.MDI"
         xmlns:local="clr-namespace:HY_MeshViewer"
         mc:Ignorable="d"
         Title="HY-MeshViewer" Height="720" Width="1280" MinHeight="720" MinWidth="1280"
@@ -54,16 +53,16 @@
             </ToolBarTray>
 
             <local:PropertyControl x:Name="PropertyControl" Visibility="Visible" />
-            <local:ViewerControl  x:Name="ViewerControl"/>
+            <local:ViewerControl_GL  x:Name="ViewerControl_GL"/>
         </DockPanel>
 
 
         <DockPanel Name="Statusbar" Visibility="Visible" Grid.Row="2" Grid.ColumnSpan="2" >
             <DockPanel.Resources>
-                <local:ViewerControl x:Key="myDataSource"/>
+                <local:ViewerControl_GL x:Key="viewerControlDataSource"/>
             </DockPanel.Resources>
             <DockPanel.DataContext>
-                <Binding Source="{StaticResource myDataSource}"/>
+                <Binding Source="{StaticResource viewerControlDataSource}"/>
             </DockPanel.DataContext>
             <StatusBar DockPanel.Dock="Top">
                 <StatusBarItem>

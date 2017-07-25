@@ -29,5 +29,9 @@ namespace HY_MeshViewer
         {
 
         }
+
+        private void ColorButtonClick(object sender, RoutedEventArgs e)
+        {
+        }
     }
 }

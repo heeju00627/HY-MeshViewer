@@ -16,53 +16,131 @@ using System.Windows.Media.Media3D;
 using Microsoft.Win32;
 using System.IO;
 using _3DTools;
-using WPF.MDI;
 
 namespace HY_MeshViewer
 {
+    /* node 정보 */
+    public struct Vertex
+    {
+        // id는 dictionary로 관리
+        Point3D position;
+        double[] properties;
+
+        /** 생성자 */
+        public Vertex(String[] tmp, int n_property)
+        {
+            position = new Point3D(Double.Parse(tmp[0]), Double.Parse(tmp[1]), Double.Parse(tmp[2]));
+      
+            properties = new double[n_property];
+            for (int i = 0; i < n_property; i++)
+            {
+                properties[i] = Double.Parse(tmp[3 + i]);
+            }
+        }
+
+        public Point3D getPosition()
+        {
+            return position;
+        }
+
+        public double[] getProperties()
+        {
+            return properties;
+        }
+    }
+
+    /* triangle 정보 */
+    public struct Triangle
+    {
+        int[] indices;
+        // geometry + material로 구성
+        GeometryModel3D geoModel;
+
+        public Triangle(String[] tmp, int n_index)
+        {
+            indices = new int[n_index];
+            for (int i = 0; i < n_index; i++)
+            {
+                indices[i] = Int32.Parse(tmp[i]);
+            }
+
+            geoModel = new GeometryModel3D();
+        }
+
+        public int[] getIndices()
+        {
+            return indices;
+        }
+
+        public GeometryModel3D getGeomodel()
+        {
+            return geoModel;
+        }
+
+        public void setGeomodel(MeshGeometry3D mesh, Material material)
+        {
+            geoModel.Geometry = mesh;
+            geoModel.Material = material;
+        }
+
+        public void setMaterial(Material material)
+        {
+            geoModel.Material = material;
+        }
+    }
+
+
     /// <summary>
     /// ViewerControl.xaml에 대한 상호 작용 논리
     /// </summary>
     public partial class ViewerControl : UserControl
     {
+        // 데이터 파일
         String fileName;
 
+        // 데이터 관리
+        Dictionary<int, Vertex> vertices;
+        List<Triangle> triangles;
+
         int n_node;
-        int n_face;
+        int n_triangle;
         int n_property;
+        // triangle mesh : n_index == 3
         int n_index;
 
-        Point3D[] nodes;
-        int[][] faces;
-        double[][] properties;
-
+        // Viewport 관리(단일 모델)
         ModelVisual3D model;
         Transform3DGroup transformGroup;
 
+        // mouse 입력 정보
         private bool mDown;
         private Point mLastPos;
 
+
+        /** 생성자 */
         public ViewerControl()
         {
             InitializeComponent();
 
+            // model 생성 + 속성
             model = new ModelVisual3D();
             transformGroup = new Transform3DGroup();
-
-            //model.Transform = new Transform3DGroup();
             this.mainViewport.Children.Add(model);
-
+            
+            // camera 속성
             PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
             camera.Transform = new Transform3DGroup();
         }
 
         /* ------------------------------------------------------------------------------------------------ */
-        /* viewport slider, mouse event */
+        /* viewport slider */
 
+        /** 확대축소 슬라이더 */
         private void ZoomSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
         }
 
+        /** x축 회전 슬라이더 */
         private void XSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             AxisAngleRotation3D rotation = new AxisAngleRotation3D(new Vector3D(1, 0, 0), 5);
@@ -74,6 +152,7 @@ namespace HY_MeshViewer
             model.Transform = transformGroup;
         }
 
+        /** y축 회전 슬라이더 */
         private void YSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             AxisAngleRotation3D rotation = new AxisAngleRotation3D(new Vector3D(0, 1, 0), 5);
@@ -85,6 +164,7 @@ namespace HY_MeshViewer
             model.Transform = transformGroup;
         }
 
+        /** z축 회전 슬라이더 */
         private void ZSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             AxisAngleRotation3D rotation = new AxisAngleRotation3D(new Vector3D(0, 0, 1), 5);
@@ -96,6 +176,10 @@ namespace HY_MeshViewer
             model.Transform = transformGroup;
         }
 
+        /* ------------------------------------------------------------------------------------------------ */
+        /* mouse event */
+
+        /** 마우스 휠 -> 확대축소 (ctrl + 클릭 으로 변경 요망) */
         private void OnGridMouseWheel(object sender, MouseWheelEventArgs e)
         {
             PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
@@ -104,6 +188,7 @@ namespace HY_MeshViewer
                 camera.Position.X - e.Delta / 20D, camera.Position.Y - e.Delta / 20D, camera.Position.Z - e.Delta / 20D);
         }
 
+        /** 마우스 왼쪽버튼 눌렀을 때 */
         private void OnGridMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton != MouseButtonState.Pressed) return;
@@ -114,6 +199,7 @@ namespace HY_MeshViewer
                     pos.X - this.ActualWidth / 2,
                     this.ActualHeight / 2 - pos.Y);
 
+            // 더블클릭 했을 때 클릭 위치 메세지 팝업
             if (e.ClickCount == 2)
             {
                 PointHitTestParameters hitParams = new PointHitTestParameters(pos);
@@ -129,15 +215,19 @@ namespace HY_MeshViewer
                 }, hitParams);
 
                 mDown = false;
+
+                Coloring();
             }
 
         }
 
+        /** 마우스 왼쪽버튼 뗐을 때 */
         private void OnGridMouseUp(object sender, MouseButtonEventArgs e)
         {
             mDown = false;
         }
 
+        /** 마우스 왼쪽버튼 누른 뒤 움직일 때 */
         private void OnGridMouseMove(object sender, MouseEventArgs e)
         {
             if (!mDown) return;
@@ -178,9 +268,6 @@ namespace HY_MeshViewer
             double rotation = 0.02 *
                     Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
 
-            //PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
-            //Transform3DGroup group = camera.Transform as Transform3DGroup;
-
             QuaternionRotation3D r =
                  new QuaternionRotation3D(
                  new Quaternion(axis, rotation * 180 / Math.PI));
@@ -195,12 +282,11 @@ namespace HY_MeshViewer
 
 
         /* ------------------------------------------------------------------------------------------------ */
-        /*  */
+        /** 파일 관리 */
 
+        /* 파일 열기 */
         public void OpenFile()
         {
-            // TODO
-            // open 되어 있는 파일이 있을 때 close할지 여부 물어보기! 혹은 새창 띄우기
             if (fileName != null)
             {
                 MessageBoxResult result = MessageBox.Show("Do you want to close file?", "There is already...", MessageBoxButton.YesNo);
@@ -228,6 +314,7 @@ namespace HY_MeshViewer
 
                 String[] data = File.ReadAllLines(openDlg.FileName);
 
+                // 첫째줄 데이터 정보
                 String[] tmp = data[0].Split(' ');
 
                 // 올바른 file 아님
@@ -238,52 +325,47 @@ namespace HY_MeshViewer
                 }
 
                 n_node = Int32.Parse(tmp[0]);
-                n_face = Int32.Parse(tmp[1]);
+                n_triangle = Int32.Parse(tmp[1]);
                 n_property = Int32.Parse(tmp[2]);
                 n_index = Int32.Parse(tmp[3]);
 
-                nodes = new Point3D[n_node];
-                faces = new int[n_face][];
-                properties = new double[n_node][];
-
+                vertices = new Dictionary<int, Vertex>();
+                triangles = new List<Triangle>();
+                
                 for (int i = 0; i < n_node; i++)
                 {
                     tmp = data[i + 1].Split('\t');
-                    nodes[i] = new Point3D(Double.Parse(tmp[0]), Double.Parse(tmp[1]), Double.Parse(tmp[2]));
 
-                    properties[i] = new double[n_property];
-                    for (int j = 0; j < n_property; j++)
-                    {
-                        properties[i][j] = Double.Parse(tmp[3 + j]);
-                    }
+                    Vertex v = new Vertex(tmp, n_property);
+
+                    vertices.Add(i, v);
                 }
-                for (int i = 0; i < n_face; i++)
+
+                for (int i = 0; i < n_triangle; i++)
                 {
                     tmp = data[i + 1 + n_node].Split('\t');
 
-                    faces[i] = new int[n_index];
-                    for (int j = 0; j < n_index; j++)
-                    {
-                        faces[i][j] = Int32.Parse(tmp[j]);
-                    }
+                    Triangle t = new Triangle(tmp, n_index);
+
+                    triangles.Add(t);
                 }
 
                 DrawModel();
             }
         }
 
+        /* 파일 닫기 */
         public void CloseFile()
         {
             n_node = 0;
-            n_face = 0;
+            n_triangle = 0;
             n_property = 0;
             n_index = 0;
-
-            nodes = null;
-            faces = null;
-            properties = null;
-
+            
             fileName = null;
+
+            vertices = null;
+            triangles = null;
 
             ModelVisual3D m;
 
@@ -297,53 +379,38 @@ namespace HY_MeshViewer
             model = new ModelVisual3D();
             this.mainViewport.Children.Add(model);
 
+            // 카메라 속성 초기화
             PerspectiveCamera camera = (PerspectiveCamera)mainViewport.Camera;
             camera.Transform = new Transform3DGroup();
         }
 
         /* ------------------------------------------------------------------------------------------------ */
-        /* Model3DGroup : GeometryModel3D 집합 or Model3DGroup의 집합... 작은 compopnent로서 기능 */
+        /** Model3DGroup : GeometryModel3D 집합 or Model3DGroup의 집합... 작은 compopnent로서 기능 */
 
-        /** 단일 삼각형 mesh를 포함하는 Model3DGroup 생성 */
-        private Model3DGroup CreateTriangleModel(Point3D p0, Point3D p1, Point3D p2)
+        private void CreateTriangle(Triangle t)
         {
             MeshGeometry3D mesh = new MeshGeometry3D();
+            Material material = new DiffuseMaterial(new SolidColorBrush(Colors.AliceBlue));
 
-            mesh.Positions.Add(p0);
-            mesh.Positions.Add(p1);
-            mesh.Positions.Add(p2);
+            foreach (int i in t.getIndices())
+            {
+                mesh.Positions.Add(vertices[i].getPosition());
+            }
 
             mesh.TriangleIndices.Add(0);
             mesh.TriangleIndices.Add(1);
             mesh.TriangleIndices.Add(2);
 
-            Vector3D normal = CalculateNormal(p0, p1, p2);
-            mesh.Normals.Add(normal);
-            mesh.Normals.Add(normal);
-            mesh.Normals.Add(normal);
+            //Vector3D normal = CalculateNormal(p0, p1, p2);
+            //mesh.Normals.Add(normal);
+            //mesh.Normals.Add(normal);
+            //mesh.Normals.Add(normal);
 
             mesh.TextureCoordinates.Add(new Point(0, 0));
-            mesh.TextureCoordinates.Add(new Point(0, 1));
-            mesh.TextureCoordinates.Add(new Point(1, 1));
             mesh.TextureCoordinates.Add(new Point(1, 0));
+            mesh.TextureCoordinates.Add(new Point(0, 1));
 
-            LinearGradientBrush brush = new LinearGradientBrush();
-
-            brush.StartPoint = new Point(0, 0);
-            brush.EndPoint = new Point(1, 1);
-            brush.GradientStops.Add(new GradientStop(Colors.Yellow, 0.0));
-            brush.GradientStops.Add(new GradientStop(Colors.Red, 0.25));
-            brush.GradientStops.Add(new GradientStop(Colors.Blue, 0.75));
-            brush.GradientStops.Add(new GradientStop(Colors.LimeGreen, 1.0));
-
-            //Material material = new DiffuseMaterial(new SolidColorBrush(Colors.AliceBlue));
-            Material material = new DiffuseMaterial(brush);
-            GeometryModel3D model = new GeometryModel3D(mesh, material);
-
-            Model3DGroup group = new Model3DGroup();
-            group.Children.Add(model);
-
-            return group;
+            t.setGeomodel(mesh, material);
         }
         
         /** normal vector 계산 */
@@ -357,19 +424,15 @@ namespace HY_MeshViewer
         private void DrawModel()
         {
             Model3DGroup group = new Model3DGroup();
-            Model3DCollection a = new Model3DCollection();
 
-            if (nodes != null)
+            if (triangles != null)
             {
-                for (int i = 0; i < n_face; i++)
+                foreach (Triangle t in triangles)
                 {
-                    /* 일단 triangle mesh만 사용 */
-                    Model3DGroup t = CreateTriangleModel(nodes[faces[i][0]], nodes[faces[i][1]], nodes[faces[i][2]]);
-
-                    a.Add(t);
+                    CreateTriangle(t);
+                    group.Children.Add(t.getGeomodel());
                 }
 
-                group.Children = a;
                 model.Content = group;
             }
 
@@ -380,10 +443,8 @@ namespace HY_MeshViewer
             }
         }
 
-        private void Coloring()
-        {
-
-
+        public void Coloring()
+        { 
         }
     }
 }
