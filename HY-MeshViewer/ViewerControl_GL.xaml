@@ -29,7 +29,7 @@
                 </Grid.LayoutTransform>
                 <sharpGL:OpenGLControl Name="openGlCtrl"
                     OpenGLDraw="OpenGLControl_OpenGLDraw" OpenGLInitialized="OpenGLControl_OpenGLInitialized"
-                    RenderContextType="FBO" Loaded="OpenGLControl_Loaded" Resized="OpenGLControl_Resized"/>
+                    RenderContextType="FBO" Loaded="OpenGLControl_Loaded"/>
             </Grid>
         </DockPanel>
 

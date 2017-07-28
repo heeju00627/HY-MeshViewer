@@ -33,5 +33,24 @@ namespace HY_MeshViewer
         private void ColorButtonClick(object sender, RoutedEventArgs e)
         {
         }
+
+        private void comboBoxPolygonMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            /*if (openGlCtrl == null || openGlCtrl.OpenGL == null)
+                return;
+
+            switch (polygonModeComboBox.SelectedIndex)
+            {
+                case 0:
+                    openGlCtrl.OpenGL.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Points);
+                    break;
+                case 1:
+                    openGlCtrl.OpenGL.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Lines);
+                    break;
+                case 2:
+                    openGlCtrl.OpenGL.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Filled);
+                    break;
+            }*/
+        }
     }
 }

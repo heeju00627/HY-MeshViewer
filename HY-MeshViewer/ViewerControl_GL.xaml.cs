@@ -100,7 +100,10 @@ namespace HY_MeshViewer
 
 
         ShaderProgram program = new ShaderProgram();
-        float rotation = 0;
+
+        float rotationX = 0;
+        float rotationY = 0;
+        float rotationZ = 0;
 
         /** 생성자 */
         public ViewerControl_GL()
@@ -119,16 +122,19 @@ namespace HY_MeshViewer
         /** x축 회전 슬라이더 */
         private void XSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            rotationX = (float)e.NewValue;
         }
 
         /** y축 회전 슬라이더 */
         private void YSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            rotationY = (float)e.NewValue;
         }
 
         /** z축 회전 슬라이더 */
         private void ZSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            rotationZ= (float)e.NewValue;
         }
 
         /* ------------------------------------------------------------------------------------------------ */
@@ -248,8 +254,15 @@ namespace HY_MeshViewer
         }
 
         /** normal vector 계산 */
-        private void CalculateNormal(Point3D p0, Point3D p1, Point3D p2)
+        private Vector3D CalculateNormal(int[] indices)
         {
+            Vertex p0 = nodes[indices[0]].getPosition();
+            Vertex p1 = nodes[indices[1]].getPosition();
+            Vertex p2 = nodes[indices[2]].getPosition();
+
+            Vector3D v0 = new Vector3D(p1.X - p0.X, p1.Y - p0.Y, p1.Z - p0.Z);
+            Vector3D v1 = new Vector3D(p2.X - p1.X, p2.Y - p1.Y, p2.Z - p1.Z);
+            return Vector3D.CrossProduct(v0, v1);
         }
 
         private void DrawModel()
@@ -278,25 +291,41 @@ namespace HY_MeshViewer
             // Get the OpenGL instance
             OpenGL gl = args.OpenGL;
 
-            // Clear The Screen And The Depth Buffer
+            // Clear The Color And The Depth Buffer
+            gl.ClearColor(0f, 0f, 0f, 0f);
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
-
+             
             // Move Left And Into The Screen
             gl.LoadIdentity();
             gl.Translate(0.0f, 0.0f, -6.0f);
-            gl.Scale(0.01f, 0.01f, 0.01f);
+            gl.Scale(0.02f, 0.02f, 0.02f);
+            //gl.Scale(0.5f, 0.5f, 0.5f);
 
             program.Push(gl, null);
-            gl.Rotate(rotation, 0.0f, 0.1f, 0.0f);
+            gl.Rotate(rotationX, 0.1f, 0.0f, 0.0f);
+            gl.Rotate(rotationY, 0.0f, 0.1f, 0.0f);
+            gl.Rotate(rotationZ, 0.0f, 0.1f, 0.1f);
+
+
+            /* mesh 형태! */
+            //gl.PushAttrib(OpenGL.GL_POLYGON_BIT);
+            //gl.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Lines);
+
+            //Teapot tp = new Teapot();
+            //tp.Draw(gl, 14, 1, OpenGL.GL_FILL);
 
             if (triangles != null)
             {
 
-                gl.Begin(OpenGL.GL_TRIANGLES);                  // Start Drawing The Pyramid
+                gl.Begin(OpenGL.GL_TRIANGLES);                  // Start Drawing
 
                 foreach (Triangle t in triangles)
                 {
                     int[] indices = t.getIndices();
+
+                    Vector3D normal = CalculateNormal(indices);
+
+                    gl.Normal(normal.X, normal.Y, normal.Z);
 
                     foreach (int i in indices)
                     {
@@ -309,39 +338,52 @@ namespace HY_MeshViewer
 
             }
 
-            rotation += 3.0f;
             program.Pop(gl, null);
         }
-
 
 
         private void OpenGLControl_OpenGLInitialized(object sender, OpenGLEventArgs args)
         {
             OpenGL gl = args.OpenGL;
 
+            //gl.Enable(OpenGL.GL_NORMALIZE);
             gl.Enable(OpenGL.GL_DEPTH_TEST);
+            gl.DepthFunc(OpenGL.GL_LESS);
+            //gl.Enable(OpenGL.GL_CULL_FACE);
 
             float[] global_ambient = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
-            float[] light0pos = new float[] { 0.0f, 5.0f, 10.0f, 1.0f };
+            float[] lmodel_ambient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
+            float[] light0pos = new float[] { 50.0f, 50.0f, 50.0f, 0.0f };
             float[] light0ambient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
-            float[] light0diffuse = new float[] { 0.3f, 0.3f, 0.3f, 1.0f };
+            float[] light0diffuse = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
             float[] light0specular = new float[] { 0.8f, 0.8f, 0.8f, 1.0f };
 
-            float[] lmodel_ambient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
-            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+            // 전반사 반사율
+            float[] lightOspecref = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
 
-            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
+            //gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+            //gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, light0pos);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, light0ambient);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, light0diffuse);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPECULAR, light0specular);
+
             gl.Enable(OpenGL.GL_LIGHTING);
             gl.Enable(OpenGL.GL_LIGHT0);
 
+            // Enable color tracking
+            gl.Enable(OpenGL.GL_COLOR_MATERIAL);
+            gl.ColorMaterial(OpenGL.GL_FRONT, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+            
+            // 전반사 반사율 설정
+            gl.Material(OpenGL.GL_FRONT, OpenGL.GL_SPECULAR, lightOspecref);
+            // 재질의 밝기 설정..
+            gl.Material(OpenGL.GL_FRONT, OpenGL.GL_SHININESS, 0);
+
             gl.ShadeModel(OpenGL.GL_SMOOTH);
 
-            /*//  Create a vertex shader.
-            VertexShader vertexShader = new VertexShader();
+            //  Create a vertex shader.
+            /*VertexShader vertexShader = new VertexShader();
             vertexShader.CreateInContext(gl);
             vertexShader.SetSource(
                 "void main()" + Environment.NewLine +
@@ -376,27 +418,6 @@ namespace HY_MeshViewer
 
         }
 
-        private void OpenGLControl_Resized(object sender, OpenGLEventArgs args)
-        {
-        }
-
-        private void comboBoxPolygonMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (openGlCtrl == null || openGlCtrl.OpenGL == null)
-                return;
-
-            switch (polygonModeComboBox.SelectedIndex)
-            {
-                case 0:
-                    openGlCtrl.OpenGL.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Points);
-                    break;
-                case 1:
-                    openGlCtrl.OpenGL.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Lines);
-                    break;
-                case 2:
-                    openGlCtrl.OpenGL.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Filled);
-                    break;
-            }
-        }
+        
     }
 }
