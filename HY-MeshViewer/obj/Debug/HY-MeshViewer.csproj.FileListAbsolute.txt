@@ -1,7 +1,6 @@
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\HY-MeshViewer.exe.config
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\HY-MeshViewer.exe
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\HY-MeshViewer.pdb
-C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\3DTools.dll
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\3DTools.pdb
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.csprojResolveAssemblyReference.cache
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\App.g.cs
@@ -12,13 +11,6 @@ C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.csproj.GenerateResource.Cache
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.exe
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.pdb
-C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\WPF.MDI.dll
-C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\MainedWindow.g.cs
-C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\MainedWindow.baml
-C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\MainWindow.g.cs
-C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\MainWindow.baml
-C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\PropertyControl.g.cs
-C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\PropertyControl.baml
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\GeneratedInternalTypeHelper.g.cs
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.dll
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.SceneGraph.dll
@@ -26,8 +18,13 @@ C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.xml
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.SceneGraph.pdb
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.SceneGraph.xml
-C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\ViewerControl_GL.g.cs
-C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\ViewerControl_GL.baml
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.WPF.dll
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.WPF.pdb
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.WPF.xml
+C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\View\MainWindow.g.cs
+C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\View\PropertyControl.g.cs
+C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\View\ViewerControl_GL.g.cs
+C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\View\MainWindow.baml
+C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\View\PropertyControl.baml
+C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\View\ViewerControl_GL.baml
+C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\App.baml

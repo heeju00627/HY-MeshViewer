@@ -25,57 +25,6 @@ using SharpGL.SceneGraph.Shaders;
 
 namespace HY_MeshViewer
 {
-    /* node 정보 */
-    public struct Node
-    {
-        // id는 dictionary로 관리
-        Vertex position;
-        float[] properties;
-
-        /** 생성자 */
-        public Node(String[] tmp, int n_property)
-        {
-            position = new Vertex(float.Parse(tmp[0]), float.Parse(tmp[1]), float.Parse(tmp[2]));
-
-            properties = new float[n_property];
-            for (int i = 0; i < n_property; i++)
-            {
-                properties[i] = float.Parse(tmp[3 + i]);
-            }
-        }
-
-        public Vertex getPosition()
-        {
-            return position;
-        }
-
-        public float[] getProperties()
-        {
-            return properties;
-        }
-    }
-
-    /* triangle 정보 */
-    public struct Triangle
-    {
-        int[] indices;
-
-        public Triangle(String[] tmp, int n_index)
-        {
-            indices = new int[n_index];
-            for (int i = 0; i < n_index; i++)
-            {
-                indices[i] = Int32.Parse(tmp[i]);
-            }
-        }
-
-        public int[] getIndices()
-        {
-            return indices;
-        }
-    }
-
-
     /// <summary>
     /// ViewerControl.xaml에 대한 상호 작용 논리
     /// </summary>

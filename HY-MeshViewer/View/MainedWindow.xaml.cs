@@ -18,7 +18,7 @@ using System.IO;
 using _3DTools;
 using WPF.MDI;
 
-namespace HY_MeshViewer
+namespace HY_MeshViewer.View
 {
     /// <summary>
     /// MainedWindow.xaml에 대한 상호 작용 논리

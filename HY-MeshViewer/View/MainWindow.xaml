@@ -1,12 +1,19 @@
-﻿<Window x:Class="HY_MeshViewer.MainWindow"
+﻿<Window x:Class="HY_MeshViewer.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:HY_MeshViewer"
+        xmlns:local="clr-namespace:HY_MeshViewer.View"
+        xmlns:viewmodel ="clr-namespace:HY_MeshViewer.ViewModel"
         mc:Ignorable="d"
         Title="HY-MeshViewer" Height="720" Width="1280" MinHeight="720" MinWidth="1280"
         ResizeMode="CanResizeWithGrip">
+    <Window.Resources>
+        <viewmodel:MainWindowViewModel x:Key="MainWindowViewModel"/>
+    </Window.Resources>
+    <Window.DataContext>
+        <viewmodel:MainWindowViewModel x:Name="aaaa"/>
+    </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Name="zeroRow" Height="18" />
@@ -21,8 +28,8 @@
         <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
             <Menu Name="MainMenu" DockPanel.Dock="Top" >    
                 <MenuItem Name="menuFile" Header="File">
-                    <MenuItem Name="submenuOpen" Header="Open" Click="SubmenuOpen_Click"/>
-                    <MenuItem Name="submenuClose" Header="Close" Click="SubmenuClose_Click"/>
+                    <MenuItem Name="submenuOpen" Header="Open" Command="{Binding OpenCommand}"/>
+                    <MenuItem Name="submenuClose" Header="Close" Command="{Binding CloseCommand}"/>
                     <MenuItem Name="submenuExit" Header="Exit" Click="SubmenuExit_Click"/>
                 </MenuItem>
 
@@ -54,17 +61,22 @@
 
             <local:PropertyControl x:Name="PropertyControl" Visibility="Visible" />
             <local:ViewerControl_GL  x:Name="ViewerControl_GL"/>
+            
         </DockPanel>
 
 
         <DockPanel Name="Statusbar" Visibility="Visible" Grid.Row="2" Grid.ColumnSpan="2" >
             <StatusBar DockPanel.Dock="Top">
                 <StatusBarItem>
-                    <TextBlock Name="Position" Text="{Binding Path=Position}"/>
+                    <TextBlock Name="Position" Text="{Binding Path=Mesh.MousePosition}"/>
                 </StatusBarItem>
                 <Separator/>
                 <StatusBarItem>
                     <TextBlock Name="FileName" Text="{Binding Path=FileName}"/>
+                </StatusBarItem>
+                <Separator/>
+                <StatusBarItem>
+                    <TextBlock Name="N_Triangle" Text="{Binding Path=N_triangle}"/>
                 </StatusBarItem>
             </StatusBar>
         </DockPanel>
