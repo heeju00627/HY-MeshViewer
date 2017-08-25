@@ -14,7 +14,7 @@ namespace HY_MeshViewer.ViewModel
 
         public ViewModelBase()
         {
-            
+
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -23,7 +23,6 @@ namespace HY_MeshViewer.ViewModel
             if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                MessageBox.Show(propertyName, "message", MessageBoxButton.OK);
             }
         }
     }

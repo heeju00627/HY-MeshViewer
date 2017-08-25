@@ -17,7 +17,13 @@ using System.IO;
 using WPF.MDI;
 using _3DTools;
 using HY_MeshViewer.ViewModel;
-
+using HY_MeshViewer.Model;
+using SharpGL;
+using SharpGL.Enumerations;
+using SharpGL.SceneGraph;
+using SharpGL.SceneGraph.Core;
+using SharpGL.SceneGraph.Primitives;
+using SharpGL.SceneGraph.Shaders;
 namespace HY_MeshViewer.View
 {
     /// <summary>
@@ -25,14 +31,14 @@ namespace HY_MeshViewer.View
     /// </summary>
     public partial class MainWindow : Window
     {
-    
+
         public MainWindow()
         {
             InitializeComponent();
         }
 
         /* ------------------------------------------------------------------------------------------------ */
-        /* menu click event */
+        /* menu event */
         private void SubmenuExit_Click(object sender, RoutedEventArgs e)
         {
             Environment.Exit(0);
@@ -81,5 +87,459 @@ namespace HY_MeshViewer.View
                 submenuPropertybox.IsChecked = true;
             }
         }
+
+        /* ------------------------------------------------------------------------------------------------ */
+        /* property control */
+
+        private void comboBoxPolygonMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (this.openGlControl == null || this.openGlControl.OpenGL == null)
+                return;
+
+            switch (polygonModeComboBox.SelectedIndex)
+            {
+                case 0:
+                    this.openGlControl.OpenGL.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Points);
+                    break;
+                case 1:
+                    this.openGlControl.OpenGL.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Lines);
+                    break;
+                case 2:
+                    this.openGlControl.OpenGL.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Filled);
+                    break;
+            }
+        }
+        
+        /* ------------------------------------------------------------------------------------------------ */
+        /* viewer control */
+
+        private void OpenGLControl_OpenGLInitialized(object sender, OpenGLEventArgs args)
+        {
+            OpenGL gl = args.OpenGL;
+
+            // 가려진 면 제거
+            gl.Enable(OpenGL.GL_DEPTH_TEST);
+            gl.DepthFunc(OpenGL.GL_LEQUAL);
+            gl.Enable(OpenGL.GL_NORMALIZE);
+
+            uint[] lights = new uint[] { OpenGL.GL_LIGHT0, OpenGL.GL_LIGHT1, OpenGL.GL_LIGHT2, OpenGL.GL_LIGHT3 };
+            
+            // 주변반사에 대한 물체색(흡수율)
+            float[] materialAmbient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
+            // 확산반사에 대한 물체색(반사율)
+            float[] materialDiffuse = new float[] { 0.8f, 0.8f, 0.8f, 1.0f };
+            // 경면반사에 대한 물체색(흡수율)
+            float[] materialSpecular = new float[] { 0.0f, 0.0f, 0.0f, 0.0f };
+
+            // 전역 주변광
+            float[] global_ambient = new float[] { 0.8f, 0.2f, 0.2f, 1.0f };
+
+            // 조명 위치
+            float[][] lightOpos = new float[][] { new float[] { 0f, 0f, 40f, 1.0f }, new float[] { 0f, -40f, 0f, 1.0f }, new float[] { 40f, 0f, 0f, 1.0f }, new float[] { -40f, 0f, 0f, 1.0f } };
+            
+            // 주변광
+            float[] light0ambient = new float[] { 0.7f, 0.7f, 0.7f, 1.0f };
+            // 분산광
+            float[] light0diffuse = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+            // 반사광
+            float[] light0specular = new float[] { 0.8f, 0.8f, 0.8f, 0.8f };
+
+            // 전체적인 밝기 분포
+            float lightConstAttenuation = -110.0f;
+            // 1차 계수(거리에 따른 밝기)
+            float lightLinearAttenuation = -100.0f;
+            // 2차 계수
+            float lightQuadraticAttenuation = 0.0f;
+            
+            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
+
+            for (int i = 0; i < 4; i++)
+            {
+                gl.Light(lights[i], OpenGL.GL_POSITION, lightOpos[i]);
+                gl.Light(lights[i], OpenGL.GL_AMBIENT, light0ambient);
+                gl.Light(lights[i], OpenGL.GL_DIFFUSE, light0diffuse);
+                gl.Light(lights[i], OpenGL.GL_SPECULAR, light0specular);
+                gl.Light(lights[i], OpenGL.GL_CONSTANT_ATTENUATION, lightConstAttenuation);
+                gl.Light(lights[i], OpenGL.GL_LINEAR_ATTENUATION, lightLinearAttenuation);
+                gl.Light(lights[i], OpenGL.GL_QUADRATIC_ATTENUATION, lightQuadraticAttenuation);
+            }
+            
+            // 조명 활성화
+            gl.Enable(OpenGL.GL_LIGHTING);
+            // 조명 ON
+            for (int i = 0; i < 4; i++)
+            {
+                gl.Enable(lights[i]);
+            }
+
+            // Enable color tracking
+            gl.Enable(OpenGL.GL_COLOR_MATERIAL);
+            gl.ColorMaterial(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT);
+
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE, materialDiffuse);
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT, materialAmbient);
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_DIFFUSE, materialDiffuse);
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_SPECULAR, materialSpecular);
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_SHININESS, 0.0f);
+
+            // 매끄러운 세이딩 사용
+            gl.ShadeModel(OpenGL.GL_SMOOTH);
+        }
+
+        private void DrawAxis(OpenGL gl)
+        {
+            gl.LineWidth(2);
+            gl.Begin(OpenGL.GL_LINES);
+
+            gl.Color(1.0f, 0.0f, 0.0f);
+            gl.Vertex(0.0f, 0.0f, 0.0f);
+            gl.Vertex(1000.0f, 0.0f, 0.0f);
+
+            gl.Color(0.0f, 1.0f, 0.0f);
+            gl.Vertex(0.0f, 0.0f, 0.0f);
+            gl.Vertex(0.0f, 1000.0f, 0.0f);
+
+            gl.Color(0.0f, 0.0f, 1.0f);
+            gl.Vertex(0.0f, 0.0f, 0.0f);
+            gl.Vertex(0.0f, 0.0f, 1000.0f);
+
+            gl.End();
+        }
+
+        /// <summary>
+        /// Handles the OpenGLDraw event of the OpenGLControl control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="args">The <see cref="SharpGL.SceneGraph.OpenGLEventArgs"/> instance containing the event data.</param>
+        private void OpenGLControl_OpenGLDraw(object sender, OpenGLEventArgs args)
+        {
+            Point pos = Mouse.GetPosition(this);
+
+            Point actualPos = new Point(
+                    pos.X - this.ActualWidth / 2,
+                    pos.Y - this.ActualHeight / 2);
+
+            MainWindowViewModel.MousePosition = pos;
+
+            OpenGL gl = args.OpenGL;
+
+            // 후면 제거
+            if (cullfaceCheckBox.IsChecked == true)
+            {
+                gl.Enable(OpenGL.GL_CULL_FACE);
+            }
+            else
+            {
+                gl.Disable(OpenGL.GL_CULL_FACE);
+            }
+
+            // Clear The Color And The Depth Buffer, Current Matrix
+            gl.ClearColor(255f, 255f, 255f, 0.0f);
+            //gl.ClearDepth(1.0f);
+            gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
+            gl.LoadIdentity();
+
+            // Move Left And Into The Screen(object)
+            gl.Translate(MainWindowViewModel.TranslationX, MainWindowViewModel.TranslationY, MainWindowViewModel.TranslationZ);
+
+            double scale = MainWindowViewModel.Scale;
+            gl.Scale(scale, scale, scale);
+
+            //program.Push(gl, null);
+            /*gl.Rotate(MainWindowViewModel.RotationX, 0.1f, 0.0f, 0.0f);
+            gl.Rotate(MainWindowViewModel.RotationY, 0.0f, 0.1f, 0.0f);
+            gl.Rotate(MainWindowViewModel.RotationZ, 0.0f, 0.1f, 0.1f);*/
+            gl.Rotate(MainWindowViewModel.RotationAngle, MainWindowViewModel.RotationAxis.X, MainWindowViewModel.RotationAxis.Y, MainWindowViewModel.RotationAxis.Z);
+
+            if (MainWindowViewModel.Triangles != null && MainWindowViewModel.Nodes != null)
+            {
+                gl.Begin(OpenGL.GL_TRIANGLES);                  // Start Drawing
+
+                if (coloringCheckBox.IsChecked == true)
+                {
+                    //gl.Enable(OpenGL.GL_COLOR_MATERIAL);
+
+                    // Vertex normal
+                    if (vertexNormalRadioButton.IsChecked == true)
+                    {
+                        int count = MainWindowViewModel.N_triangle;
+                        for (int i = 0; i < count; i++)
+                        {
+                            Triangle t = MainWindowViewModel.Triangles[i];
+                            int[] indices = t.getIndices();
+
+                            foreach (int ind in indices)
+                            {
+                                Node n = MainWindowViewModel.Nodes[ind];
+
+                                Vector3D normal = n.getNormal();
+
+                                gl.Color(n.getProperties());
+                                gl.Vertex(n.getPosition());
+                                gl.Normal(normal.X, normal.Y, normal.Z);
+                            }
+                        }
+                    }
+                    // Face normal
+                    else
+                    {
+                        int count = MainWindowViewModel.N_triangle;
+                        for (int i = 0; i < count; i++)
+                        {
+                            Triangle t = MainWindowViewModel.Triangles[i];
+                            int[] indices = t.getIndices();
+
+                            Vector3D normal = t.getNormal();
+
+                            gl.Normal(normal.X, normal.Y, normal.Z);
+
+                            foreach (int ind in indices)
+                            {
+                                Node n = MainWindowViewModel.Nodes[ind];
+
+                                gl.Color(n.getProperties());
+                                gl.Vertex(n.getPosition());
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    //gl.Disable(OpenGL.GL_COLOR_MATERIAL);
+                    gl.Color(255, 255, 255);
+
+                    // Vertex normal
+                    if (vertexNormalRadioButton.IsChecked == true)
+                    {
+                        int count = MainWindowViewModel.N_triangle;
+                        for (int i = 0; i < count; i++)
+                        {
+                            Triangle t = MainWindowViewModel.Triangles[i];
+                            int[] indices = t.getIndices();
+
+                            foreach (int ind in indices)
+                            {
+                                Node n = MainWindowViewModel.Nodes[ind];
+
+                                Vector3D normal = n.getNormal();
+
+                                gl.Vertex(n.getPosition());
+                                gl.Normal(normal.X, normal.Y, normal.Z);
+                            }
+                        }
+                    }
+
+                    // Face normal
+                    else
+                    {
+                        int count = MainWindowViewModel.N_triangle;
+                        for (int i = 0; i < count; i++)
+                        {
+                            Triangle t = MainWindowViewModel.Triangles[i];
+                            int[] indices = t.getIndices();
+                            Vector3D normal = t.getNormal();
+
+                            gl.Normal(normal.X, normal.Y, normal.Z);
+
+                            foreach (int ind in indices)
+                            {
+                                Node n = MainWindowViewModel.Nodes[ind];
+
+                                gl.Vertex(n.getPosition());
+                            }
+                        }
+                    }
+                }
+                
+                gl.End();
+            }
+
+            DrawAxis(gl);
+        }
+
+        // mouse 입력 정보
+        private bool mLeftDown;
+        private bool mRightDown;
+        private Point mLastPos;
+
+
+        private void OpenGlControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!mLeftDown && !mRightDown) return;
+
+            Point pos = Mouse.GetPosition(this);
+
+            Point actualPos = new Point(
+                    pos.X - this.ActualWidth / 2,
+                    pos.Y - this.ActualHeight / 2);
+
+            double dx = actualPos.X - mLastPos.X;
+            double dy = mLastPos.Y - actualPos.Y;
+
+            double mouseAngle = 0;
+
+            if (dx != 0 && dy != 0)
+            {
+                mouseAngle = Math.Asin(Math.Abs(dy) /
+                    Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
+
+                if (dx < 0 && dy > 0) mouseAngle += Math.PI / 2;
+                else if (dx < 0 && dy < 0) mouseAngle += Math.PI;
+                else if (dx > 0 && dy < 0) mouseAngle += Math.PI * 1.5;
+            }
+            else if (dx == 0 && dy != 0)
+            {
+                mouseAngle = Math.Sign(dy) > 0 ? Math.PI / 2 : Math.PI * 1.5;
+            }
+            else if (dx != 0 && dy == 0)
+            {
+                mouseAngle = Math.Sign(dx) > 0 ? 0 : Math.PI;
+            }
+
+            double axisAngle = mouseAngle + Math.PI / 2;
+
+            Vector3D axis = new Vector3D(
+                    Math.Cos(axisAngle),
+                    Math.Sin(axisAngle), 0);
+
+            double rotation = 0.02 *
+                    Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
+            
+            if (mLeftDown && !mRightDown)
+            {
+                MainWindowViewModel.RotationAxis = axis;
+                MainWindowViewModel.RotationAngle += (float)(rotation / Math.PI);
+                //MainWindowViewModel.RotationAngle += (float)(rotation * 180 / Math.PI);
+            }
+
+            else if (!mLeftDown && mRightDown)
+            {
+                MainWindowViewModel.TranslationX += (float)dx / 100;
+                MainWindowViewModel.TranslationY += (float)dy / 100;
+            }
+
+            mLastPos = actualPos;
+        }
+
+        private void OpenGlControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed) return;
+
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+            {
+                MainWindowViewModel.TranslationZ += 0.5f;
+            }
+
+            mLeftDown = true;
+
+            Point pos = Mouse.GetPosition(this);
+
+            mLastPos = new Point(
+                    pos.X - this.ActualWidth / 2,
+                    pos.Y - this.ActualHeight / 2);
+
+            // 더블클릭 했을 때 클릭 위치 메세지 팝업
+            if (e.ClickCount == 2)
+            {
+                OpenGL gl = this.openGlControl.OpenGL;
+
+                int[] viewport = new int[4];
+                double[] modelMatrix = new double[16];
+                double[] projectionMatrix = new double[16];
+
+                gl.GetInteger(OpenGL.GL_VIEWPORT, viewport);
+                gl.GetDouble(OpenGL.GL_MODELVIEW_MATRIX, modelMatrix);
+                gl.GetDouble(OpenGL.GL_PROJECTION_MATRIX, projectionMatrix);
+
+                float winY = (float)(viewport[3] - MainWindowViewModel.MousePosition.X);
+
+                double x, y, z;
+                x = y = z = 0;
+                gl.UnProject(MainWindowViewModel.MousePosition.X, winY, 0.0f, modelMatrix, projectionMatrix, viewport, ref x, ref y, ref z);
+
+                MessageBox.Show(x.ToString() + " " + y.ToString() + " " + z.ToString(), "pos", MessageBoxButton.OK);
+
+                PointHitTestParameters hitParams = new PointHitTestParameters(pos);
+                VisualTreeHelper.HitTest(this, null, delegate (HitTestResult hr)
+                {
+                    RayMeshGeometry3DHitTestResult rayHit = hr as
+                    RayMeshGeometry3DHitTestResult;
+                    if (rayHit != null)
+                    {
+                        MessageBox.Show(rayHit.PointHit.ToString(), "pos", MessageBoxButton.OK);
+                    }
+                    return HitTestResultBehavior.Continue;
+                }, hitParams);
+
+                mLeftDown = false;
+            }
+        }
+
+        private void OpenGlControl_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.RightButton != MouseButtonState.Pressed) return;
+
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+            {
+                //if (MainWindowViewModel.TranslationZ > 0.02f)
+                    MainWindowViewModel.TranslationZ -= 0.5f;
+                return;
+            }
+
+            mRightDown = true;
+
+            Point pos = Mouse.GetPosition(this);
+            mLastPos = new Point(
+                    pos.X - this.ActualWidth / 2,
+                    pos.Y - this.ActualHeight / 2);
+        }
+
+        private void OpenGlControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            mLeftDown = false;
+            
+        }
+
+        private void OpenGlControl_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            mRightDown = false;
+        }
+
+        private void CalcInScreenPosition(Point p)
+        {
+            // camera position, camera viewing direction
+            Vector3D position = new Vector3D(0, 0, 0);
+            Vector3D view = new Vector3D(0, 0, -6);
+            
+        }
+
+        /*private PickingRay picking(float screenX, float screenY, PickingRay pickingRay)
+        {
+            Vector3D position = new Vector3D(0, 0, 0);
+            Vector3D view = new Vector3D(0, 0, -6);
+
+            pickingRay.setClickPosInWorld(position);
+            pickingRay.addClickPosInWorld(view);
+
+            screenX -= (float)this.ActualWidth / 2f;
+            screenY -= (float)this.ActualHeight / 2f;
+
+            // normalize to 1
+            screenX /= ((float)this.ActualWidth / 2f);
+            screenY /= ((float)this.ActualHeight / 2f);
+
+            Vector3D v = new Vector3D(
+                    screenHorizontally.X * screenX + screenVertically.X * screenY,
+                    screenHorizontally.Y * screenX + screenVertically.Y * screenY,
+                    screenHorizontally.Z * screenX + screenVertically.Z * screenY
+                );
+
+            pickingRay.addClickPosInWorld(v);
+
+            pickingRay.setDirection(pickingRay.getClickPosInWorld());
+            pickingRay.addDirection(-position);
+
+            return pickingRay;
+        }*/
     }
 }

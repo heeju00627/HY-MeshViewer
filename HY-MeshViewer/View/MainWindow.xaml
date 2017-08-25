@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HY_MeshViewer.View"
         xmlns:viewmodel ="clr-namespace:HY_MeshViewer.ViewModel"
+        xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
         mc:Ignorable="d"
         Title="HY-MeshViewer" Height="720" Width="1280" MinHeight="720" MinWidth="1280"
         ResizeMode="CanResizeWithGrip">
@@ -12,7 +13,7 @@
         <viewmodel:MainWindowViewModel x:Key="MainWindowViewModel"/>
     </Window.Resources>
     <Window.DataContext>
-        <viewmodel:MainWindowViewModel x:Name="aaaa"/>
+        <viewmodel:MainWindowViewModel x:Name="MainWindowViewModel"/>
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
@@ -59,16 +60,98 @@
                 </ToolBar>
             </ToolBarTray>
 
-            <local:PropertyControl x:Name="PropertyControl" Visibility="Visible" />
-            <local:ViewerControl_GL  x:Name="ViewerControl_GL"/>
-            
+            <Grid Name="PropertyControl" Visibility="Visible">
+                <StackPanel>
+                    <StackPanel.Background>
+                        <LinearGradientBrush>
+                            <GradientStop Color="White" Offset="0"/>
+                            <GradientStop Color="FloralWhite" Offset=".3"/>
+                            <GradientStop Color="FloralWhite" Offset=".7"/>
+                            <GradientStop Color="White" Offset="1"/>
+                        </LinearGradientBrush>
+                    </StackPanel.Background>
+                    <StackPanel Margin="10">
+                        <TextBlock Text="X Position:"/>
+                        <TextBox Name="positionXTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=TranslationX}"/>
+                        <TextBlock Text="Y Position:"/>
+                        <TextBox Name="positionYTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=TranslationY}"/>
+                        <TextBlock Text="Z Position:"/>
+                        <TextBox Name="positionZTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=TranslationZ}"/>
+                        <Separator/>
+                        <TextBlock Text="Rotation Angle:"/>
+                        <TextBox Name="rotationAngleTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=RotationAngle}"/>
+                        <TextBlock Text="Rotation X:"/>
+                        <TextBox Name="rotationXTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=RotationAxis.X}"/>
+                        <TextBlock Text="Rotation Y:"/>
+                        <TextBox Name="rotationYTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=RotationAxis.Y}"/>
+                        <TextBlock Text="Rotation Z:"/>
+                        <TextBox Name="rotationZTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=RotationAxis.Z}"/>
+                        <TextBlock Text="Scale:"/>
+                        <TextBox Name="scaleTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=Scale}"/>
+                        <Separator/>
+                        <Button Name="resetButton" Command="{Binding ResetCommand}">Reset</Button>
+                        <Label Name="label" Height="28" Margin="0,0,0,12" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" >Label</Label>
+                        <Separator />
+                        <ComboBox x:Name="polygonModeComboBox" Width="100" SelectedIndex="2" SelectionChanged="comboBoxPolygonMode_SelectionChanged">
+                            <ComboBoxItem>Points</ComboBoxItem>
+                            <ComboBoxItem>Lines</ComboBoxItem>
+                            <ComboBoxItem>Polygons</ComboBoxItem>
+                        </ComboBox>
+                        <CheckBox Name="cullfaceCheckBox" Content="Cull Face"></CheckBox>
+                        <CheckBox Name="coloringCheckBox" Content="Coloring"></CheckBox>
+                        <RadioButton Name="faceNormalRadioButton" Content="Face Normal" IsChecked="True"></RadioButton>
+                        <RadioButton Name="vertexNormalRadioButton" Content="Vertex Normal"></RadioButton>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <Grid Name="ViewerControl" Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Name="zeroViewerRow" Height="18" />
+                    <RowDefinition Name="firstViewerRow" Height="*" />
+                    <RowDefinition Name="secondViewerRow" Height="18" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="18" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="18" />
+                </Grid.ColumnDefinitions>
+
+                <DockPanel Grid.Row="1" Grid.Column="1">
+                    <Grid Name="content" Background="White">
+                        <Grid.LayoutTransform>
+                            <TransformGroup>
+                                <ScaleTransform x:Name="scaleTransform"/>
+                                <RotateTransform x:Name="rotateTransform"/>
+                            </TransformGroup>
+                        </Grid.LayoutTransform>
+                        <sharpGL:OpenGLControl Name="openGlControl"
+                            OpenGLDraw="OpenGLControl_OpenGLDraw" OpenGLInitialized="OpenGLControl_OpenGLInitialized"
+                            DrawFPS="True" RenderContextType="FBO"
+                            MouseMove="OpenGlControl_MouseMove" MouseLeftButtonDown="OpenGlControl_MouseLeftButtonDown"
+                                               MouseLeftButtonUp="OpenGlControl_MouseLeftButtonUp" MouseRightButtonDown="OpenGlControl_MouseRightButtonDown"
+                                               MouseRightButtonUp="OpenGlControl_MouseRightButtonUp"/>
+                    </Grid>
+                </DockPanel>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="13,0,0,0">x</TextBlock>
+                <TextBlock Grid.Row="0" Grid.Column="2" Margin="6,3,0,0">y</TextBlock>
+                <TextBlock Grid.Row="2" Grid.Column="2" Margin="0,0,13,0">z</TextBlock>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,-6,0,0">+-</TextBlock>
+
+                <Slider Grid.Row="1" Grid.Column="0" Name="zoomSlider" ToolTipService.ToolTip="zoomSlider" Orientation="Vertical" Minimum="0.02" Maximum="1" Value="{Binding Scale}"/>
+                <Slider Grid.Row="0" Grid.Column="1" Name="xSlider" ToolTipService.ToolTip="xSlider" Orientation="Horizontal" Minimum="-180" Maximum="180" Value="{Binding RotationX}"/>
+                <Slider Grid.Row="1" Grid.Column="2" Name="ySlider" ToolTipService.ToolTip="ySlider" Orientation="Vertical" Minimum="-180" Maximum="180" Value="{Binding RotationY}"/>
+                <Slider Grid.Row="2" Grid.Column="1" Name="zSlider" ToolTipService.ToolTip="zSlider" Orientation="Horizontal" Minimum="-180" Maximum="180" Value="{Binding RotationZ}"/>
+            </Grid>
+
         </DockPanel>
 
 
         <DockPanel Name="Statusbar" Visibility="Visible" Grid.Row="2" Grid.ColumnSpan="2" >
             <StatusBar DockPanel.Dock="Top">
                 <StatusBarItem>
-                    <TextBlock Name="Position" Text="{Binding Path=Mesh.MousePosition}"/>
+                    <TextBlock Name="Position" Text="{Binding Path=MousePosition}"/>
                 </StatusBarItem>
                 <Separator/>
                 <StatusBarItem>

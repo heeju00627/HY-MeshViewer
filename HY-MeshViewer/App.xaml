@@ -6,11 +6,5 @@
              xmlns:viewmodel ="clr-namespace:HY_MeshViewer.ViewModel"
              StartupUri="View\MainWindow.xaml">
     <Application.Resources>
-        <DataTemplate x:Name="PropertyTemplate" DataType="{x:Type viewmodel:PropertyControlViewModel}">
-            <view:PropertyControl/>
-        </DataTemplate>
-        <DataTemplate x:Name="ViewerTemplate"  DataType="{x:Type viewmodel:ViewerControlViewModel}">
-            <view:ViewerControl_GL/>
-        </DataTemplate>
     </Application.Resources>
 </Application>

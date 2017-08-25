@@ -14,21 +14,16 @@ using System.Windows;
 using SharpGL;
 using SharpGL.SceneGraph;
 using SharpGL.Enumerations;
+using HY_MeshViewer.View;
 
 namespace HY_MeshViewer.ViewModel
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        private object _propertyView;
-        private object _viewerView;
-
         private Mesh _mesh;
 
         public MainWindowViewModel()
         {
-            PropertyView = new PropertyControlViewModel();
-            ViewerView = new ViewerControlViewModel();
-
             _mesh = new Mesh
             {
                 FileName = "no file",
@@ -38,33 +33,19 @@ namespace HY_MeshViewer.ViewModel
                 N_property = 0,
                 N_triangle = 0,
 
-                RotationX = 0,
-                RotationY = 0,
-                RotationZ = 0
+                RotationAxis = new Vector3D(0, 0, 0),
+                RotationAngle = 0,
+
+                TranslationX = 0,
+                TranslationY = 0,
+                TranslationZ = -6.0f,
+
+                Scale = 0.02f,
             };
 
             OpenCommand = new RelayCommand(OpenFile);
             CloseCommand = new RelayCommand(CloseFile);
-        }
-
-        public object PropertyView
-        {
-            get { return this._propertyView; }
-            set
-            {
-                _propertyView = value;
-                NotifyPropertyChanged("PropertyView");
-            }
-        }
-
-        public object ViewerView
-        {
-            get { return this._viewerView; }
-            set
-            {
-                _viewerView = value;
-                NotifyPropertyChanged("ViewerView");
-            }
+            ResetCommand = new RelayCommand(ResetProperty);
         }
 
         public Mesh Mesh
@@ -76,7 +57,7 @@ namespace HY_MeshViewer.ViewModel
                 NotifyPropertyChanged("Mesh");
             }
         }
-        
+
         public string FileName
         {
             get { return this._mesh.FileName; }
@@ -96,13 +77,33 @@ namespace HY_MeshViewer.ViewModel
                 NotifyPropertyChanged("Nodes");
             }
         }
-        public List<Triangle> Triangles
+        public Dictionary<int, Triangle> Triangles
         {
             get { return this._mesh.Triangles; }
             set
             {
                 this._mesh.Triangles = value;
                 NotifyPropertyChanged("Triangles");
+            }
+        }
+
+        public Point MousePosition
+        {
+            get { return this._mesh.MousePosition; }
+            set
+            {
+                this._mesh.MousePosition = value;
+                NotifyPropertyChanged("MousePosition");
+            }
+        }
+
+        public Vector3D MouseInScreenPosition
+        {
+            get { return this._mesh.MouseInScreenPosition; }
+            set
+            {
+                this._mesh.MouseInScreenPosition = value;
+                NotifyPropertyChanged("MouseInScreenPosition");
             }
         }
 
@@ -143,6 +144,78 @@ namespace HY_MeshViewer.ViewModel
             }
         }
 
+        public Vector3D RotationAxis
+        {
+            get { return this._mesh.RotationAxis; }
+            set
+            {
+                this._mesh.RotationAxis = value;
+                NotifyPropertyChanged("RotationAxis");
+            }
+        }
+
+        public float RotationAngle
+        {
+            get { return this._mesh.RotationAngle; }
+            set
+            {
+                this._mesh.RotationAngle = value;
+                NotifyPropertyChanged("RotationAngle");
+            }
+        }
+
+        public float TranslationX
+        {
+            get { return this._mesh.TranslationX; }
+            set
+            {
+                this._mesh.TranslationX = value;
+                NotifyPropertyChanged("TranslationX");
+            }
+        }
+
+        public float TranslationY
+        {
+            get { return this._mesh.TranslationY; }
+            set
+            {
+                this._mesh.TranslationY = value;
+                NotifyPropertyChanged("TranslationY");
+            }
+        }
+
+        public float TranslationZ
+        {
+            get { return this._mesh.TranslationZ; }
+            set
+            {
+                this._mesh.TranslationZ = value;
+                NotifyPropertyChanged("TranslationZ");
+            }
+        }
+
+        public double Scale
+        {
+            get { return this._mesh.Scale; }
+            set
+            {
+                this._mesh.Scale = value;
+                NotifyPropertyChanged("Scale");
+            }
+        }
+
+
+        public PickingRay PickingRay
+        {
+            get { return this._mesh.PickingRay; }
+            set
+            {
+                this._mesh.PickingRay = value;
+                NotifyPropertyChanged("PickingRay");
+            }
+        }
+
+
         #region Command
         public ICommand OpenCommand
         {
@@ -155,7 +228,13 @@ namespace HY_MeshViewer.ViewModel
             get;
             set;
         }
-        
+
+        public ICommand ResetCommand
+        {
+            get;
+            set;
+        }
+
         public sealed class RelayCommand : ICommand
         {
             private Action function;
@@ -180,37 +259,6 @@ namespace HY_MeshViewer.ViewModel
                 remove { CommandManager.RequerySuggested -= value; }
             }
         }
-
-        /*private ICommand mUpdater;
-        public ICommand UpdateCommand
-        {
-            get
-            {
-                if (mUpdater == null)
-                    mUpdater = new Updater();
-                return mUpdater;
-            }
-            set
-            {
-                mUpdater = value;
-            }
-        }
-
-        public class Updater : ICommand
-        {
-            #region ICommand Members
-            public bool CanExecute(object parameter)
-            {
-                return true;
-            }
-            public event EventHandler CanExecuteChanged;
-            public void Execute(object parameter)
-            {
-
-            }
-            #endregion
-        }*/
-
         #endregion
 
         private void OpenFile()
@@ -248,6 +296,7 @@ namespace HY_MeshViewer.ViewModel
                 if (tmp.Length != 4)
                 {
                     MessageBox.Show("wrong file", "Error Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                    CloseFile();
                     return;
                 }
 
@@ -257,7 +306,7 @@ namespace HY_MeshViewer.ViewModel
                 N_index = Int32.Parse(tmp[3]);
 
                 Nodes = new Dictionary<int, Node>();
-                Triangles = new List<Triangle>();
+                Triangles = new Dictionary<int, Triangle>();
 
                 for (int i = 0; i < N_node; i++)
                 {
@@ -274,8 +323,22 @@ namespace HY_MeshViewer.ViewModel
 
                     Triangle t = new Triangle(tmp, N_index);
 
-                    Triangles.Add(t);
+                    int[] indices = t.getIndices();
+
+                    foreach (int ind in indices)
+                    {
+                        Nodes[ind].setConfaces(i);
+                    }
+
+                    Vector3D normal = CalculateFaceNormal(indices);
+                    t.setNormal(normal);
+
+                    Triangles.Add(i, t);
                 }
+
+                CalculateVertexNormal();
+
+                ResetProperty();
             }
         }
 
@@ -290,6 +353,69 @@ namespace HY_MeshViewer.ViewModel
 
             Nodes = null;
             Triangles = null;
+
+            TranslationX = 0;
+            TranslationY = 0;
+            TranslationZ = -6.0f;
+
+            RotationAxis = new Vector3D(0, 0, 0);
+            RotationAngle = 0;
+
+            Scale = 0.02f;
+        }
+
+        private void ResetProperty()
+        {
+            TranslationX = 0;
+            TranslationY = 0;
+            TranslationZ = -6.0f;
+
+            RotationAxis = new Vector3D(0, 0, 0);
+            RotationAngle = 0;
+
+            Scale = 0.02f;
+        }
+
+        private Vector3D CalculateFaceNormal(int[] indices)
+        {
+            Vector3D normal;
+
+            Vertex p0 = Nodes[indices[0]].getPosition();
+            Vertex p1 = Nodes[indices[1]].getPosition();
+            Vertex p2 = Nodes[indices[2]].getPosition();
+
+            Vector3D v0 = new Vector3D(p1.X - p0.X, p1.Y - p0.Y, p1.Z - p0.Z);
+            Vector3D v1 = new Vector3D(p2.X - p1.X, p2.Y - p1.Y, p2.Z - p1.Z);
+
+            normal = Vector3D.CrossProduct(v0, v1);
+
+            return normal;
+        }
+
+        private void CalculateVertexNormal()
+        {
+            for (int i = 0; i < N_node; i++)
+            {
+                Node n = Nodes[i];
+
+                List<int> cons = n.getConfaces();
+                if (cons.Count() == 1)
+                {
+                    int t = cons.First();
+                    n.setNormal(Triangles[t].getNormal());
+                }
+                else
+                {
+                    Vector3D normal = new Vector3D(0, 0, 0);
+                    foreach (int c in cons)
+                    {
+                        normal += Triangles[c].getArea() * Triangles[c].getNormal();
+                    }
+
+                    n.Normalize(normal);
+                }
+                Nodes[i] = n;
+            }
         }
     }
 }

@@ -72,28 +72,12 @@
     </ApplicationDefinition>
     <Compile Include="Model\Mesh.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
-    <Compile Include="ViewModel\PropertyControlViewModel.cs" />
-    <Compile Include="ViewModel\ViewerControlViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
-    <Compile Include="View\PropertyControl.xaml.cs">
-      <DependentUpon>PropertyControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\ViewerControl_GL.xaml.cs">
-      <DependentUpon>ViewerControl_GL.xaml</DependentUpon>
-    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Page Include="View\MainWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\PropertyControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\ViewerControl_GL.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
