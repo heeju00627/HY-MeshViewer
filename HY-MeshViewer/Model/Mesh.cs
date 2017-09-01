@@ -35,7 +35,7 @@ namespace HY_MeshViewer.Model
             properties = new float[n_property];
             for (int i = 0; i < n_property; i++)
             {
-                properties[i] = float.Parse(tmp[3 + i]);
+                properties[i] = float.Parse(tmp[3 + i]) / (float)255.0;
             }
 
             normal = new Vector3D(0, 0, 0);
@@ -100,7 +100,7 @@ namespace HY_MeshViewer.Model
             indices = new int[n_index];
             for (int i = 0; i < n_index; i++)
             {
-                indices[i] = Int32.Parse(tmp[i]);
+                indices[i] = Int32.Parse(tmp[n_index - i -1]);
             }
 
             normal = new Vector3D(0, 0, 0);
@@ -144,50 +144,58 @@ namespace HY_MeshViewer.Model
         }
     }
 
-    public class PickingRay
+    public struct Ray
     {
-        private Vector3D clickPosInWorld = new Vector3D();
-        private Vector3D direction = new Vector3D();
+        Vector3D near;
+        Vector3D far;
+        Vector3D direction;
 
-        /* Compute the intersection of this ray with the X-Y Plane (where Z = 0)
-         * and writes it back to the provided vector.
-         */
-        public void intersectionWithXyPlane(float[] worldPos)
+        float minR;
+        Vector3D hitPos;
+
+        public Ray(Vector3D near, Vector3D far, Vector3D direction)
         {
-            double s = -clickPosInWorld.Z / direction.Z;
-            worldPos[0] = (float)(clickPosInWorld.X + direction.X * s);
-            worldPos[1] = (float)(clickPosInWorld.Y + direction.Y * s);
-            worldPos[2] = 0;
+            this.near = near;
+            this.far = far;
+            this.direction = direction;
+
+            this.minR = float.MaxValue;
+            this.hitPos = new Vector3D(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
         }
 
-        public Vector3D getClickPosInWorld()
+        public Vector3D getNear()
         {
-            return clickPosInWorld;
+            return near;
         }
 
-        public void setClickPosInWorld(Vector3D v)
+        public Vector3D getFar()
         {
-            clickPosInWorld = v;
+            return far;
         }
 
-        public void addClickPosInWorld(Vector3D v)
-        {
-            clickPosInWorld += v;
-        }
-
-        public Vector3D getDireciton()
+        public Vector3D getDirection()
         {
             return direction;
         }
 
-        public void setDirection(Vector3D v)
+        public float getMinR()
         {
-            direction = v;
+            return minR;
         }
 
-        public void addDirection(Vector3D v)
+        public void setMinR(float f)
         {
-            direction += v;
+            minR = f;
+        }
+
+        public Vector3D getHitPos()
+        {
+            return hitPos;
+        }
+
+        public void setHitPos(Vector3D v)
+        {
+            hitPos = v;
         }
     }
 
@@ -210,7 +218,7 @@ namespace HY_MeshViewer.Model
 
         // 마우스 정보
         public Point MousePosition { get; set; }
-        public Vector3D MouseInScreenPosition { get; set; }
+        public Ray MouseRay { get; set; }
 
         // mesh 정보
         public int N_node { get; set; }
@@ -226,7 +234,5 @@ namespace HY_MeshViewer.Model
         public float TranslationZ { get; set; }
 
         public double Scale { get; set; }
-
-        public PickingRay PickingRay { get; set; }
     }
 }

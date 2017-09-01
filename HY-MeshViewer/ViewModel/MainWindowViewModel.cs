@@ -97,13 +97,13 @@ namespace HY_MeshViewer.ViewModel
             }
         }
 
-        public Vector3D MouseInScreenPosition
+        public Ray MouseRay
         {
-            get { return this._mesh.MouseInScreenPosition; }
+            get { return this._mesh.MouseRay; }
             set
             {
-                this._mesh.MouseInScreenPosition = value;
-                NotifyPropertyChanged("MouseInScreenPosition");
+                this._mesh.MouseRay = value;
+                NotifyPropertyChanged("MouseRay");
             }
         }
 
@@ -203,17 +203,7 @@ namespace HY_MeshViewer.ViewModel
                 NotifyPropertyChanged("Scale");
             }
         }
-
-
-        public PickingRay PickingRay
-        {
-            get { return this._mesh.PickingRay; }
-            set
-            {
-                this._mesh.PickingRay = value;
-                NotifyPropertyChanged("PickingRay");
-            }
-        }
+      
 
 
         #region Command
@@ -362,6 +352,8 @@ namespace HY_MeshViewer.ViewModel
             RotationAngle = 0;
 
             Scale = 0.02f;
+
+            MouseRay = new Ray();
         }
 
         private void ResetProperty()
@@ -385,7 +377,7 @@ namespace HY_MeshViewer.ViewModel
             Vertex p2 = Nodes[indices[2]].getPosition();
 
             Vector3D v0 = new Vector3D(p1.X - p0.X, p1.Y - p0.Y, p1.Z - p0.Z);
-            Vector3D v1 = new Vector3D(p2.X - p1.X, p2.Y - p1.Y, p2.Z - p1.Z);
+            Vector3D v1 = new Vector3D(p2.X - p0.X, p2.Y - p0.Y, p2.Z - p0.Z);
 
             normal = Vector3D.CrossProduct(v0, v1);
 

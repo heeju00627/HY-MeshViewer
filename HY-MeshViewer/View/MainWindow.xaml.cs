@@ -125,33 +125,33 @@ namespace HY_MeshViewer.View
             uint[] lights = new uint[] { OpenGL.GL_LIGHT0, OpenGL.GL_LIGHT1, OpenGL.GL_LIGHT2, OpenGL.GL_LIGHT3 };
             
             // 주변반사에 대한 물체색(흡수율)
-            float[] materialAmbient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
+            float[] materialAmbient = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
             // 확산반사에 대한 물체색(반사율)
             float[] materialDiffuse = new float[] { 0.8f, 0.8f, 0.8f, 1.0f };
             // 경면반사에 대한 물체색(흡수율)
-            float[] materialSpecular = new float[] { 0.0f, 0.0f, 0.0f, 0.0f };
+            float[] materialSpecular = new float[] { 0.3f, 0.3f, 0.3f, 1.0f };
 
             // 전역 주변광
-            float[] global_ambient = new float[] { 0.8f, 0.2f, 0.2f, 1.0f };
+            float[] global_ambient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
 
             // 조명 위치
-            float[][] lightOpos = new float[][] { new float[] { 0f, 0f, 40f, 1.0f }, new float[] { 0f, -40f, 0f, 1.0f }, new float[] { 40f, 0f, 0f, 1.0f }, new float[] { -40f, 0f, 0f, 1.0f } };
+            float[][] lightOpos = new float[][] { new float[] { 0f, 0f, 300f, 1.0f }, new float[] { 0f, -300f, 0f, 1.0f }, new float[] { 300f, 0f, 0f, 1.0f }, new float[] { -300f, 0f, 0f, 1.0f } };
             
             // 주변광
-            float[] light0ambient = new float[] { 0.7f, 0.7f, 0.7f, 1.0f };
+            float[] light0ambient = new float[] { 0.8f, 0.8f, 0.8f, 1.0f };
             // 분산광
             float[] light0diffuse = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
             // 반사광
-            float[] light0specular = new float[] { 0.8f, 0.8f, 0.8f, 0.8f };
+            float[] light0specular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
 
             // 전체적인 밝기 분포
-            float lightConstAttenuation = -110.0f;
+            float lightConstAttenuation = 2.0f;
             // 1차 계수(거리에 따른 밝기)
-            float lightLinearAttenuation = -100.0f;
+            float lightLinearAttenuation = 0.0f;
             // 2차 계수
             float lightQuadraticAttenuation = 0.0f;
             
-            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
+            //gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
 
             for (int i = 0; i < 4; i++)
             {
@@ -169,21 +169,83 @@ namespace HY_MeshViewer.View
             // 조명 ON
             for (int i = 0; i < 4; i++)
             {
+                if (i != 0) continue;
                 gl.Enable(lights[i]);
             }
 
             // Enable color tracking
             gl.Enable(OpenGL.GL_COLOR_MATERIAL);
-            gl.ColorMaterial(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT);
+            gl.ColorMaterial(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE);
 
             gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE, materialDiffuse);
             gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT, materialAmbient);
             gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_DIFFUSE, materialDiffuse);
             gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_SPECULAR, materialSpecular);
-            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_SHININESS, 0.0f);
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_SHININESS, 100.0f);
 
             // 매끄러운 세이딩 사용
             gl.ShadeModel(OpenGL.GL_SMOOTH);
+
+            /*OpenGL gl = args.OpenGL;
+
+            gl.Enable(OpenGL.GL_NORMALIZE);
+            gl.Enable(OpenGL.GL_DEPTH_TEST);
+            gl.DepthFunc(OpenGL.GL_LESS);
+            //gl.Enable(OpenGL.GL_CULL_FACE);
+
+            float[] global_ambient = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
+            float[] lmodel_ambient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
+            float[] light0pos = new float[] { 50.0f, 50.0f, 50.0f, 0.0f };
+            float[] light0ambient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
+            float[] light0diffuse = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
+            float[] light0specular = new float[] { 0.8f, 0.8f, 0.8f, 1.0f };
+
+            // 전반사 반사율
+            float[] lightOspecref = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+
+            //gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+            //gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, light0pos);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, light0ambient);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, light0diffuse);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPECULAR, light0specular);
+
+            gl.Enable(OpenGL.GL_LIGHTING);
+            gl.Enable(OpenGL.GL_LIGHT0);
+
+            // Enable color tracking
+            gl.Enable(OpenGL.GL_COLOR_MATERIAL);
+            gl.ColorMaterial(OpenGL.GL_FRONT, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+
+            // 전반사 반사율 설정
+            gl.Material(OpenGL.GL_FRONT, OpenGL.GL_SPECULAR, lightOspecref);
+            // 재질의 밝기 설정..
+            gl.Material(OpenGL.GL_FRONT, OpenGL.GL_SHININESS, 0);
+
+            gl.ShadeModel(OpenGL.GL_SMOOTH);*/
+        }
+
+        private void SetLighting(OpenGL gl)
+        {
+            uint[] lights = new uint[] { OpenGL.GL_LIGHT0, OpenGL.GL_LIGHT1, OpenGL.GL_LIGHT2, OpenGL.GL_LIGHT3 };
+            
+            // 조명 위치
+            float[][] lightOpos = new float[][] { new float[] { 0f, 0f, 400f, 1.0f }, new float[] { 0f, -400f, 0f, 1.0f }, new float[] { 4000f, 0f, 0f, 1.0f }, new float[] { -4000f, 0f, 0f, 1.0f } };
+            
+            for (int i = 0; i < 4; i++)
+            {
+                gl.Light(lights[i], OpenGL.GL_POSITION, lightOpos[i]);
+            }
+
+            // 조명 활성화
+            gl.Enable(OpenGL.GL_LIGHTING);
+            // 조명 ON
+            for (int i = 0; i < 4; i++)
+            {
+                if (i != 0) continue;
+                gl.Enable(lights[i]);
+            }
+            
         }
 
         private void DrawAxis(OpenGL gl)
@@ -202,6 +264,14 @@ namespace HY_MeshViewer.View
             gl.Color(0.0f, 0.0f, 1.0f);
             gl.Vertex(0.0f, 0.0f, 0.0f);
             gl.Vertex(0.0f, 0.0f, 1000.0f);
+
+            Vector3D near = MainWindowViewModel.MouseRay.getNear();
+            Vector3D far = MainWindowViewModel.MouseRay.getFar();
+            Vector3D hitPos = MainWindowViewModel.MouseRay.getHitPos();
+
+            gl.Color(0.0f, 0.0f, 0.0f);
+            gl.Vertex(near.X, near.Y, near.Z);
+            gl.Vertex(far.X, far.Y, far.Z);
 
             gl.End();
         }
@@ -239,26 +309,28 @@ namespace HY_MeshViewer.View
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             gl.LoadIdentity();
 
+            SetLighting(gl);
+
             // Move Left And Into The Screen(object)
             gl.Translate(MainWindowViewModel.TranslationX, MainWindowViewModel.TranslationY, MainWindowViewModel.TranslationZ);
 
             double scale = MainWindowViewModel.Scale;
             gl.Scale(scale, scale, scale);
-
-            //program.Push(gl, null);
-            /*gl.Rotate(MainWindowViewModel.RotationX, 0.1f, 0.0f, 0.0f);
-            gl.Rotate(MainWindowViewModel.RotationY, 0.0f, 0.1f, 0.0f);
-            gl.Rotate(MainWindowViewModel.RotationZ, 0.0f, 0.1f, 0.1f);*/
+            
             gl.Rotate(MainWindowViewModel.RotationAngle, MainWindowViewModel.RotationAxis.X, MainWindowViewModel.RotationAxis.Y, MainWindowViewModel.RotationAxis.Z);
+
+            
 
             if (MainWindowViewModel.Triangles != null && MainWindowViewModel.Nodes != null)
             {
+                gl.InitNames();
+                gl.PushName(0);
+
                 gl.Begin(OpenGL.GL_TRIANGLES);                  // Start Drawing
 
+                // Color Mode
                 if (coloringCheckBox.IsChecked == true)
                 {
-                    //gl.Enable(OpenGL.GL_COLOR_MATERIAL);
-
                     // Vertex normal
                     if (vertexNormalRadioButton.IsChecked == true)
                     {
@@ -268,15 +340,17 @@ namespace HY_MeshViewer.View
                             Triangle t = MainWindowViewModel.Triangles[i];
                             int[] indices = t.getIndices();
 
+                            gl.LoadName((uint)i);
+
                             foreach (int ind in indices)
                             {
                                 Node n = MainWindowViewModel.Nodes[ind];
 
                                 Vector3D normal = n.getNormal();
 
+                                gl.Normal(normal.X, normal.Y, normal.Z);
                                 gl.Color(n.getProperties());
                                 gl.Vertex(n.getPosition());
-                                gl.Normal(normal.X, normal.Y, normal.Z);
                             }
                         }
                     }
@@ -291,23 +365,23 @@ namespace HY_MeshViewer.View
 
                             Vector3D normal = t.getNormal();
 
+                            gl.LoadName((uint)i);
                             gl.Normal(normal.X, normal.Y, normal.Z);
 
                             foreach (int ind in indices)
                             {
                                 Node n = MainWindowViewModel.Nodes[ind];
-
+                                
                                 gl.Color(n.getProperties());
                                 gl.Vertex(n.getPosition());
                             }
                         }
                     }
                 }
+                // NonColor Mode
                 else
                 {
-                    //gl.Disable(OpenGL.GL_COLOR_MATERIAL);
-                    gl.Color(255, 255, 255);
-
+                    gl.Color(0.5f, 0.5f, 0.5f);
                     // Vertex normal
                     if (vertexNormalRadioButton.IsChecked == true)
                     {
@@ -316,15 +390,17 @@ namespace HY_MeshViewer.View
                         {
                             Triangle t = MainWindowViewModel.Triangles[i];
                             int[] indices = t.getIndices();
+                            
+                            gl.LoadName((uint)i);
 
                             foreach (int ind in indices)
                             {
                                 Node n = MainWindowViewModel.Nodes[ind];
 
                                 Vector3D normal = n.getNormal();
-
-                                gl.Vertex(n.getPosition());
+                                
                                 gl.Normal(normal.X, normal.Y, normal.Z);
+                                gl.Vertex(n.getPosition());
                             }
                         }
                     }
@@ -339,12 +415,13 @@ namespace HY_MeshViewer.View
                             int[] indices = t.getIndices();
                             Vector3D normal = t.getNormal();
 
+                            gl.LoadName((uint)i);
                             gl.Normal(normal.X, normal.Y, normal.Z);
 
                             foreach (int ind in indices)
                             {
                                 Node n = MainWindowViewModel.Nodes[ind];
-
+                                
                                 gl.Vertex(n.getPosition());
                             }
                         }
@@ -399,17 +476,17 @@ namespace HY_MeshViewer.View
             double axisAngle = mouseAngle + Math.PI / 2;
 
             Vector3D axis = new Vector3D(
-                    Math.Cos(axisAngle),
-                    Math.Sin(axisAngle), 0);
+                    Math.Cos(axisAngle) * 4,
+                    Math.Sin(axisAngle) * 4, 0);
 
             double rotation = 0.02 *
                     Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
             
+
             if (mLeftDown && !mRightDown)
             {
                 MainWindowViewModel.RotationAxis = axis;
-                MainWindowViewModel.RotationAngle += (float)(rotation / Math.PI);
-                //MainWindowViewModel.RotationAngle += (float)(rotation * 180 / Math.PI);
+                MainWindowViewModel.RotationAngle += (float)(rotation * 180 / Math.PI);
             }
 
             else if (!mLeftDown && mRightDown)
@@ -441,35 +518,38 @@ namespace HY_MeshViewer.View
             // 더블클릭 했을 때 클릭 위치 메세지 팝업
             if (e.ClickCount == 2)
             {
-                OpenGL gl = this.openGlControl.OpenGL;
+                Vector3D near = ConvertMouseToCoordinate(0.0f);
+                Vector3D far = ConvertMouseToCoordinate(1.0f);
+                Vector3D direction = far - near;
+                direction.Normalize();
 
-                int[] viewport = new int[4];
-                double[] modelMatrix = new double[16];
-                double[] projectionMatrix = new double[16];
+                Ray ray = MainWindowViewModel.MouseRay = new Ray(near, far, direction);
+                float r;
+                float minR = ray.getMinR();
+                Vector3D point;
+                int curFace = -1;
+                Vector3D hitPoint = ray.getHitPos();
+                int[] indices = new int[3];
 
-                gl.GetInteger(OpenGL.GL_VIEWPORT, viewport);
-                gl.GetDouble(OpenGL.GL_MODELVIEW_MATRIX, modelMatrix);
-                gl.GetDouble(OpenGL.GL_PROJECTION_MATRIX, projectionMatrix);
-
-                float winY = (float)(viewport[3] - MainWindowViewModel.MousePosition.X);
-
-                double x, y, z;
-                x = y = z = 0;
-                gl.UnProject(MainWindowViewModel.MousePosition.X, winY, 0.0f, modelMatrix, projectionMatrix, viewport, ref x, ref y, ref z);
-
-                MessageBox.Show(x.ToString() + " " + y.ToString() + " " + z.ToString(), "pos", MessageBoxButton.OK);
-
-                PointHitTestParameters hitParams = new PointHitTestParameters(pos);
-                VisualTreeHelper.HitTest(this, null, delegate (HitTestResult hr)
+                for (int i = 0; i < MainWindowViewModel.N_triangle; i++)
                 {
-                    RayMeshGeometry3DHitTestResult rayHit = hr as
-                    RayMeshGeometry3DHitTestResult;
-                    if (rayHit != null)
+                    Triangle t = MainWindowViewModel.Triangles[i];
+
+                    bool isIntersect = IsRayTriIntersect(t.getIndices(), t.getNormal(), ray.getNear(), ray.getDirection(), out point, out r);
+
+                    if (isIntersect & (r < minR))
                     {
-                        MessageBox.Show(rayHit.PointHit.ToString(), "pos", MessageBoxButton.OK);
+                        minR = r;
+                        curFace = i;
+                        hitPoint = point;
+                        indices = t.getIndices();
                     }
-                    return HitTestResultBehavior.Continue;
-                }, hitParams);
+                }
+
+                ray.setMinR(minR);
+                ray.setHitPos(hitPoint);
+
+                MessageBox.Show(near.ToString() + " " + far.ToString() + "\n" + curFace.ToString() + " " + indices[0] + "/" + indices[1] + "/" + indices[2] + "\n" + Math.Round(hitPoint.X, 2) + " " + Math.Round(hitPoint.Y, 2) + " " + Math.Round(hitPoint.Z, 2) + "\n" , "pos", MessageBoxButton.OK);
 
                 mLeftDown = false;
             }
@@ -505,41 +585,93 @@ namespace HY_MeshViewer.View
             mRightDown = false;
         }
 
-        private void CalcInScreenPosition(Point p)
+        private Vector3D ConvertMouseToCoordinate(float mouseZ)
         {
-            // camera position, camera viewing direction
-            Vector3D position = new Vector3D(0, 0, 0);
-            Vector3D view = new Vector3D(0, 0, -6);
-            
+            OpenGL gl = this.openGlControl.OpenGL;
+
+            Point position = Mouse.GetPosition(this.openGlControl);
+            //Point position = Mouse.GetPosition(this);
+
+            int[] viewport = new int[4];
+            double[] modelMatrix = new double[16];
+            double[] projectionMatrix = new double[16];
+
+            gl.GetInteger(OpenGL.GL_VIEWPORT, viewport);
+            gl.GetDouble(OpenGL.GL_MODELVIEW_MATRIX, modelMatrix);
+            gl.GetDouble(OpenGL.GL_PROJECTION_MATRIX, projectionMatrix);
+
+            float winX = (float)position.X;
+            float winY = (float)(viewport[3] - position.Y);
+
+            double x, y, z;
+            x = y = z = 0;
+            gl.UnProject(winX, winY, mouseZ, modelMatrix, projectionMatrix, viewport, ref x, ref y, ref z);
+
+            return new Vector3D(x, y, z);
         }
+        
+        private static float SMALL_NUM = 0.00000001f;
 
-        /*private PickingRay picking(float screenX, float screenY, PickingRay pickingRay)
+        private bool IsRayTriIntersect(int[] indices, Vector3D normal, Vector3D nearPoint, Vector3D direction, out Vector3D hitPoint, out float r)
         {
-            Vector3D position = new Vector3D(0, 0, 0);
-            Vector3D view = new Vector3D(0, 0, -6);
+            hitPoint = new Vector3D(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+            r = float.NegativeInfinity;
 
-            pickingRay.setClickPosInWorld(position);
-            pickingRay.addClickPosInWorld(view);
+            // check if ray and triangle are parallel
+            float dot = (float)Vector3D.DotProduct(normal, direction);
+            if (dot > -SMALL_NUM && dot < SMALL_NUM)
+            {
+                return false;
+            }
 
-            screenX -= (float)this.ActualWidth / 2f;
-            screenY -= (float)this.ActualHeight / 2f;
+            Vertex p0 = MainWindowViewModel.Nodes[indices[0]].getPosition();
+            Vertex p1 = MainWindowViewModel.Nodes[indices[1]].getPosition();
+            Vertex p2 = MainWindowViewModel.Nodes[indices[2]].getPosition();
 
-            // normalize to 1
-            screenX /= ((float)this.ActualWidth / 2f);
-            screenY /= ((float)this.ActualHeight / 2f);
+            Vector3D v0 = new Vector3D(p1.X - p0.X, p1.Y - p0.Y, p1.Z - p0.Z);
+            Vector3D v1 = new Vector3D(p2.X - p0.X, p2.Y - p0.Y, p2.Z - p0.Z);
 
-            Vector3D v = new Vector3D(
-                    screenHorizontally.X * screenX + screenVertically.X * screenY,
-                    screenHorizontally.Y * screenX + screenVertically.Y * screenY,
-                    screenHorizontally.Z * screenX + screenVertically.Z * screenY
-                );
+            // r = (normal`PA) / (normal`direction)
+            Vector3D q = new Vector3D(p0.X - nearPoint.X, p0.Y - nearPoint.Y, p0.Z - nearPoint.Z);
+            r = (float)Vector3D.DotProduct(normal, q) / dot;
 
-            pickingRay.addClickPosInWorld(v);
+            // check if triangle is at the back
+            if (r < 0)
+            {
+                r = float.NegativeInfinity;
+                return false;
+            }
 
-            pickingRay.setDirection(pickingRay.getClickPosInWorld());
-            pickingRay.addDirection(-position);
+            hitPoint = nearPoint + r * direction;
+            
+            
+            return true;
+            
+            /*Vector3D p = Vector3D.CrossProduct(direction, v1);
+            float a = (float)Vector3D.DotProduct(v0, p);
+            if (a > -SMALL_NUM && a < SMALL_NUM)
+            { 
+                return false;
+            }
 
-            return pickingRay;
-        }*/
+            float f = 1 / a;
+            Vector3D s = nearPoint - new Vector3D(p0.X, p1.X, p2.X);
+            float u = f * (float)Vector3D.DotProduct(s, p);
+            if (u < 0 || u > 1)
+            {
+                return false;
+            }
+
+            Vector3D q = Vector3D.CrossProduct(s, v0);
+            float v = f * (float)Vector3D.DotProduct(direction, q);
+            if (v < 0 || u + v > 1)
+            {
+                return false;
+            }
+
+            r = f * (float)Vector3D.DotProduct(v1, q);
+            hitPoint = nearPoint + r * direction;
+            return true;*/
+        }
     }
 }
