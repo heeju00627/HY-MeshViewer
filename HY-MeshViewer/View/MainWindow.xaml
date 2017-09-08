@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:HY_MeshViewer.View"
         xmlns:viewmodel ="clr-namespace:HY_MeshViewer.ViewModel"
         xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
+        xmlns:ncore="http://schemas.ncore.com/wpf/xaml/colorbox"
         mc:Ignorable="d"
         Title="HY-MeshViewer" Height="720" Width="1280" MinHeight="720" MinWidth="1280"
         ResizeMode="CanResizeWithGrip">
@@ -90,15 +91,19 @@
                         <TextBox Name="scaleTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=Scale}"/>
                         <Separator/>
                         <Button Name="resetButton" Command="{Binding ResetCommand}">Reset</Button>
-                        <Label Name="label" Height="28" Margin="0,0,0,12" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" >Label</Label>
                         <Separator />
+                        <CheckBox Name="coloringCheckBox" Content="Coloring"></CheckBox>
+                        <ComboBox x:Name="propertyColorComboBox" Width="100" ItemsSource="{Binding Path=Properties}" DisplayMemberPath="name" SelectedValuePath="value"></ComboBox>
+                        <Border Background="{Binding ElementName=CB, Path=Brush}"/>
+                        <ncore:ColorBox x:Name="colorBox" Grid.Column="1" Margin="10, 0, 0, 0" VerticalAlignment="Top"></ncore:ColorBox>
+                        <Separator />
+                        <CheckBox Name="cullfaceCheckBox" Content="Cull Face"></CheckBox>
                         <ComboBox x:Name="polygonModeComboBox" Width="100" SelectedIndex="2" SelectionChanged="comboBoxPolygonMode_SelectionChanged">
                             <ComboBoxItem>Points</ComboBoxItem>
                             <ComboBoxItem>Lines</ComboBoxItem>
                             <ComboBoxItem>Polygons</ComboBoxItem>
                         </ComboBox>
-                        <CheckBox Name="cullfaceCheckBox" Content="Cull Face"></CheckBox>
-                        <CheckBox Name="coloringCheckBox" Content="Coloring"></CheckBox>
+                        <Separator />
                         <RadioButton Name="faceNormalRadioButton" Content="Face Normal" IsChecked="True"></RadioButton>
                         <RadioButton Name="vertexNormalRadioButton" Content="Vertex Normal"></RadioButton>
                     </StackPanel>

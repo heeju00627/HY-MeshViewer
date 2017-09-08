@@ -274,6 +274,49 @@ namespace HY_MeshViewer.View
             gl.Vertex(far.X, far.Y, far.Z);
 
             gl.End();
+
+            /*int hitFace = MainWindowViewModel.MouseRay.getHitFace();
+
+            if (hitFace != -1)
+            {
+                Triangle t = MainWindowViewModel.Triangles[hitFace];
+                int[] indices = t.getIndices();
+
+                gl.LineWidth(2);
+                gl.Begin(OpenGL.GL_LINES);
+                gl.Color(1.0f, 0.0f, 0.0f);
+
+                foreach (int ind in indices)
+                {
+                    Node n = MainWindowViewModel.Nodes[ind];
+
+                    gl.Vertex(n.getPosition());
+                }
+                gl.End();
+            }*/
+        }
+
+        private void DrawClicked(OpenGL gl)
+        {
+            int hitFace = MainWindowViewModel.MouseRay.getHitFace();
+
+            if (hitFace != -1)
+            {
+                Triangle t = MainWindowViewModel.Triangles[hitFace];
+                int[] indices = t.getIndices();
+
+                gl.LineWidth(10);
+                gl.Begin(OpenGL.GL_LINES);
+                gl.Color(1.0f, 0.0f, 0.0f);
+
+                foreach (int ind in indices)
+                {
+                    Node n = MainWindowViewModel.Nodes[ind];
+
+                    gl.Vertex(n.getPosition());
+                }
+                gl.End();
+            }
         }
 
         /// <summary>
@@ -437,8 +480,7 @@ namespace HY_MeshViewer.View
         // mouse 입력 정보
         private bool mLeftDown;
         private bool mRightDown;
-        private Point mLastPos;
-
+        private Point mLastPos;   
 
         private void OpenGlControl_MouseMove(object sender, MouseEventArgs e)
         {
@@ -546,10 +588,17 @@ namespace HY_MeshViewer.View
                     }
                 }
 
-                ray.setMinR(minR);
-                ray.setHitPos(hitPoint);
+                if (curFace != -1)
+                {
+                    ray.setMinR(minR);
+                    ray.setHitPos(hitPoint);
+                    ray.setHitFace(curFace);
 
-                MessageBox.Show(near.ToString() + " " + far.ToString() + "\n" + curFace.ToString() + " " + indices[0] + "/" + indices[1] + "/" + indices[2] + "\n" + Math.Round(hitPoint.X, 2) + " " + Math.Round(hitPoint.Y, 2) + " " + Math.Round(hitPoint.Z, 2) + "\n" , "pos", MessageBoxButton.OK);
+                    MessageBox.Show(near.ToString() + " " + far.ToString() + "\n" + curFace.ToString() + " " + indices[0] + "/" + indices[1] + "/" + indices[2] + "\n" + Math.Round(hitPoint.X, 2) + " " + Math.Round(hitPoint.Y, 2) + " " + Math.Round(hitPoint.Z, 2) + "\n", "pos", MessageBoxButton.OK);
+
+                    OpenGL gl = this.openGlControl.OpenGL;
+                    //DrawClicked(gl);
+                }
 
                 mLeftDown = false;
             }
@@ -643,8 +692,36 @@ namespace HY_MeshViewer.View
             }
 
             hitPoint = nearPoint + r * direction;
-            
-            
+
+            Vector3D v2 = new Vector3D(hitPoint.X - p0.X, hitPoint.Y - p0.Y, hitPoint.Z - p0.Z);
+
+            Vector3D u = Vector3D.CrossProduct(v1, v2);
+            if (Vector3D.DotProduct(-normal, u) < 0)
+            {
+                hitPoint = new Vector3D(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+                r = float.NegativeInfinity;
+                return false;
+            }
+
+            Vector3D v = Vector3D.CrossProduct(v0, v2);
+            if (Vector3D.DotProduct(normal, v) < 0)
+            {
+                hitPoint = new Vector3D(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+                r = float.NegativeInfinity;
+                return false;
+            }
+
+            float denom = (float)normal.Length;
+            float ul = (float)u.Length / denom;
+            float vl = (float)v.Length / denom;
+
+            if (ul + vl > 1)
+            {
+                hitPoint = new Vector3D(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+                r = float.NegativeInfinity;
+                return false;
+            }
+
             return true;
             
             /*Vector3D p = Vector3D.CrossProduct(direction, v1);

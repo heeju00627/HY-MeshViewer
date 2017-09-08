@@ -13,6 +13,7 @@ using SharpGL.SceneGraph.Core;
 using SharpGL.SceneGraph.Primitives;
 using SharpGL.SceneGraph.Shaders;
 using System.Windows.Media.Media3D;
+using System.Windows.Controls;
 
 namespace HY_MeshViewer.Model
 {
@@ -138,7 +139,7 @@ namespace HY_MeshViewer.Model
                 normal.Z /= norm;
             }
 
-            this.normal = normal;
+            //this.normal = normal;
 
             return norm;
         }
@@ -152,6 +153,18 @@ namespace HY_MeshViewer.Model
 
         float minR;
         Vector3D hitPos;
+        int hitFace;
+
+        public Ray(int hitFace)
+        {
+            this.near = new Vector3D(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity); ;
+            this.far = new Vector3D(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity); ;
+            this.direction = new Vector3D(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity); ;
+
+            this.minR = float.MaxValue;
+            this.hitPos = new Vector3D(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+            this.hitFace = -1;
+        }
 
         public Ray(Vector3D near, Vector3D far, Vector3D direction)
         {
@@ -161,6 +174,7 @@ namespace HY_MeshViewer.Model
 
             this.minR = float.MaxValue;
             this.hitPos = new Vector3D(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+            this.hitFace = -1;
         }
 
         public Vector3D getNear()
@@ -196,6 +210,16 @@ namespace HY_MeshViewer.Model
         public void setHitPos(Vector3D v)
         {
             hitPos = v;
+        }
+
+        public int getHitFace()
+        {
+            return hitFace;
+        }
+
+        public void setHitFace(int f)
+        {
+            hitFace = f;
         }
     }
 
@@ -234,5 +258,7 @@ namespace HY_MeshViewer.Model
         public float TranslationZ { get; set; }
 
         public double Scale { get; set; }
+
+        public List<ComboBoxItem> Properties { get; set; }
     }
 }

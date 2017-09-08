@@ -22,3 +22,4 @@ C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.g.resources
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY_MeshViewer.Properties.Resources.resources
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.csproj.GenerateResource.Cache
+C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\ColorBox.dll

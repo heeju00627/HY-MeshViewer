@@ -38,6 +38,9 @@
     <Reference Include="3DTools">
       <HintPath>E:\3DTools-1.01-bin\3DTools-1.01-bin\3DTools.dll</HintPath>
     </Reference>
+    <Reference Include="ColorBox">
+      <HintPath>E:\Samples\ColorBox.dll</HintPath>
+    </Reference>
     <Reference Include="SharpGL, Version=2.4.0.0, Culture=neutral, PublicKeyToken=27fc851303210b27, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpGL.2.4.0.0\lib\net40\SharpGL.dll</HintPath>
     </Reference>

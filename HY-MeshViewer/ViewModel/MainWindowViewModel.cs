@@ -15,6 +15,7 @@ using SharpGL;
 using SharpGL.SceneGraph;
 using SharpGL.Enumerations;
 using HY_MeshViewer.View;
+using System.Windows.Controls;
 
 namespace HY_MeshViewer.ViewModel
 {
@@ -41,6 +42,8 @@ namespace HY_MeshViewer.ViewModel
                 TranslationZ = -6.0f,
 
                 Scale = 0.02f,
+
+                Properties = new List<ComboBoxItem>(),
             };
 
             OpenCommand = new RelayCommand(OpenFile);
@@ -203,7 +206,16 @@ namespace HY_MeshViewer.ViewModel
                 NotifyPropertyChanged("Scale");
             }
         }
-      
+
+        public List<ComboBoxItem> Properties
+        {
+            get { return this._mesh.Properties; }
+            set
+            {
+                this._mesh.Properties = value;
+                NotifyPropertyChanged("Properties");
+            }
+        }
 
 
         #region Command
@@ -325,6 +337,12 @@ namespace HY_MeshViewer.ViewModel
 
                     Triangles.Add(i, t);
                 }
+                
+                Properties = new List<ComboBoxItem>()
+                {
+                    new ComboBoxItem() { Name = "RGB" },
+
+                };
 
                 CalculateVertexNormal();
 
@@ -354,6 +372,8 @@ namespace HY_MeshViewer.ViewModel
             Scale = 0.02f;
 
             MouseRay = new Ray();
+
+            Properties.Clear();
         }
 
         private void ResetProperty()
