@@ -145,6 +145,25 @@ namespace HY_MeshViewer.Model
         }
     }
 
+    public struct Pyramid
+    {
+        int[] indices;
+        Vector3D normal;
+        double area;
+
+        public Pyramid(String[] tmp, int n_index)
+        {
+            indices = new int[n_index];
+            for (int i = 0; i < n_index; i++)
+            {
+                indices[i] = Int32.Parse(tmp[n_index - i - 1]);
+            }
+
+            normal = new Vector3D(0, 0, 0);
+            area = 0;
+        }
+    }
+
     public struct Ray
     {
         Vector3D near;
