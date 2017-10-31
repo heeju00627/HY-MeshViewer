@@ -23,3 +23,28 @@ C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY_MeshViewer.Properties.Resources.resources
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.csproj.GenerateResource.Cache
 C:\Users\user\Documents\Visual Studio 2017\Projects\HY-MeshViewer\HY-MeshViewer\bin\Debug\ColorBox.dll
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\HY-MeshViewer.exe.config
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.exe
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.pdb
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\HY-MeshViewer.exe
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\HY-MeshViewer.pdb
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.dll
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.SceneGraph.dll
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.WPF.dll
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\3DTools.pdb
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.pdb
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.xml
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.SceneGraph.pdb
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.SceneGraph.xml
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.WPF.pdb
+D:\HY-MeshViewer\HY-MeshViewer\bin\Debug\SharpGL.WPF.xml
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.csprojResolveAssemblyReference.cache
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\View\MainWindow.g.cs
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\App.g.cs
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\GeneratedInternalTypeHelper.g.cs
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer_MarkupCompile.cache
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer_MarkupCompile.lref
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\View\MainWindow.baml
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.g.resources
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY_MeshViewer.Properties.Resources.resources
+D:\HY-MeshViewer\HY-MeshViewer\obj\Debug\HY-MeshViewer.csproj.GenerateResource.Cache

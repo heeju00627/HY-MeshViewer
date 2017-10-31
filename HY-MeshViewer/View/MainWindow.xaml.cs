@@ -362,117 +362,232 @@ namespace HY_MeshViewer.View
             
             gl.Rotate(MainWindowViewModel.RotationAngle, MainWindowViewModel.RotationAxis.X, MainWindowViewModel.RotationAxis.Y, MainWindowViewModel.RotationAxis.Z);
 
-            
-
-            if (MainWindowViewModel.Triangles != null && MainWindowViewModel.Nodes != null)
+            if (System.IO.Path.GetExtension(MainWindowViewModel.FileName) == ".txt")
             {
-                gl.InitNames();
-                gl.PushName(0);
-
-                gl.Begin(OpenGL.GL_TRIANGLES);                  // Start Drawing
-
-                // Color Mode
-                if (coloringCheckBox.IsChecked == true)
+                if (MainWindowViewModel.Triangles != null && MainWindowViewModel.Nodes != null)
                 {
-                    // Vertex normal
-                    if (vertexNormalRadioButton.IsChecked == true)
+                    gl.InitNames();
+                    gl.PushName(0);
+
+                    gl.Begin(OpenGL.GL_TRIANGLES);                  // Start Drawing
+
+                    // Color Mode
+                    if (coloringCheckBox.IsChecked == true)
                     {
-                        int count = MainWindowViewModel.N_triangle;
-                        for (int i = 0; i < count; i++)
+                        // Vertex normal
+                        if (vertexNormalRadioButton.IsChecked == true)
                         {
-                            Triangle t = MainWindowViewModel.Triangles[i];
-                            int[] indices = t.getIndices();
-
-                            gl.LoadName((uint)i);
-
-                            foreach (int ind in indices)
+                            int count = MainWindowViewModel.N_triangle;
+                            for (int i = 0; i < count; i++)
                             {
-                                Node n = MainWindowViewModel.Nodes[ind];
+                                Triangle t = MainWindowViewModel.Triangles[i];
+                                int[] indices = t.getIndices();
 
-                                Vector3D normal = n.getNormal();
+                                gl.LoadName((uint)i);
 
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes[ind];
+
+                                    Vector3D normal = n.getNormal();
+
+                                    gl.Normal(normal.X, normal.Y, normal.Z);
+                                    gl.Color(n.getProperties());
+                                    gl.Vertex(n.getPosition());
+                                }
+                            }
+                        }
+                        // Face normal
+                        else
+                        {
+                            int count = MainWindowViewModel.N_triangle;
+                            for (int i = 0; i < count; i++)
+                            {
+                                Triangle t = MainWindowViewModel.Triangles[i];
+                                int[] indices = t.getIndices();
+
+                                Vector3D normal = t.getNormal();
+
+                                gl.LoadName((uint)i);
                                 gl.Normal(normal.X, normal.Y, normal.Z);
-                                gl.Color(n.getProperties());
-                                gl.Vertex(n.getPosition());
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes[ind];
+
+                                    gl.Color(n.getProperties());
+                                    gl.Vertex(n.getPosition());
+                                }
                             }
                         }
                     }
-                    // Face normal
+                    // NonColor Mode
                     else
                     {
-                        int count = MainWindowViewModel.N_triangle;
-                        for (int i = 0; i < count; i++)
+                        gl.Color(0.5f, 0.5f, 0.5f);
+                        // Vertex normal
+                        if (vertexNormalRadioButton.IsChecked == true)
                         {
-                            Triangle t = MainWindowViewModel.Triangles[i];
-                            int[] indices = t.getIndices();
-
-                            Vector3D normal = t.getNormal();
-
-                            gl.LoadName((uint)i);
-                            gl.Normal(normal.X, normal.Y, normal.Z);
-
-                            foreach (int ind in indices)
+                            int count = MainWindowViewModel.N_triangle;
+                            for (int i = 0; i < count; i++)
                             {
-                                Node n = MainWindowViewModel.Nodes[ind];
-                                
-                                gl.Color(n.getProperties());
-                                gl.Vertex(n.getPosition());
+                                Triangle t = MainWindowViewModel.Triangles[i];
+                                int[] indices = t.getIndices();
+
+                                gl.LoadName((uint)i);
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes[ind];
+
+                                    Vector3D normal = n.getNormal();
+
+                                    gl.Normal(normal.X, normal.Y, normal.Z);
+                                    gl.Vertex(n.getPosition());
+                                }
                             }
                         }
-                    }
-                }
-                // NonColor Mode
-                else
-                {
-                    gl.Color(0.5f, 0.5f, 0.5f);
-                    // Vertex normal
-                    if (vertexNormalRadioButton.IsChecked == true)
-                    {
-                        int count = MainWindowViewModel.N_triangle;
-                        for (int i = 0; i < count; i++)
+
+                        // Face normal
+                        else
                         {
-                            Triangle t = MainWindowViewModel.Triangles[i];
-                            int[] indices = t.getIndices();
-                            
-                            gl.LoadName((uint)i);
-
-                            foreach (int ind in indices)
+                            int count = MainWindowViewModel.N_triangle;
+                            for (int i = 0; i < count; i++)
                             {
-                                Node n = MainWindowViewModel.Nodes[ind];
+                                Triangle t = MainWindowViewModel.Triangles[i];
+                                int[] indices = t.getIndices();
+                                Vector3D normal = t.getNormal();
 
-                                Vector3D normal = n.getNormal();
-                                
+                                gl.LoadName((uint)i);
                                 gl.Normal(normal.X, normal.Y, normal.Z);
-                                gl.Vertex(n.getPosition());
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes[ind];
+
+                                    gl.Vertex(n.getPosition());
+                                }
                             }
                         }
                     }
 
-                    // Face normal
-                    else
-                    {
-                        int count = MainWindowViewModel.N_triangle;
-                        for (int i = 0; i < count; i++)
-                        {
-                            Triangle t = MainWindowViewModel.Triangles[i];
-                            int[] indices = t.getIndices();
-                            Vector3D normal = t.getNormal();
-
-                            gl.LoadName((uint)i);
-                            gl.Normal(normal.X, normal.Y, normal.Z);
-
-                            foreach (int ind in indices)
-                            {
-                                Node n = MainWindowViewModel.Nodes[ind];
-                                
-                                gl.Vertex(n.getPosition());
-                            }
-                        }
-                    }
+                    gl.End();
                 }
-                
-                gl.End();
             }
+
+            else if (System.IO.Path.GetExtension(MainWindowViewModel.FileName) == ".bin")
+            {
+                    if (MainWindowViewModel.Flag_surface == 1)
+                    {
+                        gl.InitNames();
+                        gl.PushName(0);
+
+                        gl.Begin(OpenGL.GL_TRIANGLES);                  // Start Drawing
+
+                        // Color Mode
+                        if (coloringCheckBox.IsChecked == true)
+                        {
+                            // Vertex normal
+                            if (vertexNormalRadioButton.IsChecked == true)
+                            {
+                                int count = MainWindowViewModel.Nele_cortex;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    Triangle t = MainWindowViewModel.Elements_cortex[i];
+                                    int[] indices = t.getIndices();
+
+                                    gl.LoadName((uint)i);
+
+                                    foreach (int ind in indices)
+                                    {
+                                        Node n = MainWindowViewModel.Nodes_cortex[ind];
+
+                                        Vector3D normal = n.getNormal();
+
+                                        gl.Normal(normal.X, normal.Y, normal.Z);
+                                        gl.Color(n.getProperties());
+                                        gl.Vertex(n.getPosition());
+                                    }
+                                }
+                            }
+
+                            // Face normal
+                            else
+                            {
+                                int count = MainWindowViewModel.Nele_cortex;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    Triangle t = MainWindowViewModel.Elements_cortex[i];
+                                    int[] indices = t.getIndices();
+
+                                    Vector3D normal = t.getNormal();
+
+                                    gl.LoadName((uint)i);
+                                    gl.Normal(normal.X, normal.Y, normal.Z);
+
+                                    foreach (int ind in indices)
+                                    {
+                                        Node n = MainWindowViewModel.Nodes_cortex[ind];
+
+                                        gl.Color(n.getProperties());
+                                        gl.Vertex(n.getPosition());
+                                    }
+                                }
+                            }
+                        }
+                        // NonColor Mode
+                        else
+                        {
+                            gl.Color(0.5f, 0.5f, 0.5f);
+                            // Vertex normal
+                            if (vertexNormalRadioButton.IsChecked == true)
+                            {
+                                int count = MainWindowViewModel.Nele_cortex;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    Triangle t = MainWindowViewModel.Elements_cortex[i];
+                                    int[] indices = t.getIndices();
+
+                                    gl.LoadName((uint)i);
+
+                                    foreach (int ind in indices)
+                                    {
+                                        Node n = MainWindowViewModel.Nodes_cortex[ind];
+
+                                        Vector3D normal = n.getNormal();
+
+                                        gl.Normal(normal.X, normal.Y, normal.Z);
+                                        gl.Vertex(n.getPosition());
+                                    }
+                                }
+                            }
+
+                            // Face normal
+                            else
+                            {
+                                int count = MainWindowViewModel.Nele_cortex;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    Triangle t = MainWindowViewModel.Elements_cortex[i];
+                                    int[] indices = t.getIndices();
+                                    Vector3D normal = t.getNormal();
+
+                                    gl.LoadName((uint)i);
+                                    gl.Normal(normal.X, normal.Y, normal.Z);
+
+                                    foreach (int ind in indices)
+                                    {
+                                        Node n = MainWindowViewModel.Nodes_cortex[ind];
+
+                                        gl.Vertex(n.getPosition());
+                                    }
+                                }
+                            }
+                        }
+
+                        gl.End();
+                    }
+                }
 
             DrawAxis(gl);
         }

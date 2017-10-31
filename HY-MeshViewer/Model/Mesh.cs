@@ -23,20 +23,38 @@ namespace HY_MeshViewer.Model
         // id는 dictionary로 관리
         Vertex position;
         List<int> confaces;
+        List<int> coneles;
         float[] properties;
         Vector3D normal;
 
-        /** 생성자 */
+        // 생성자
         public Node(String[] tmp, int n_property)
         {
             position = new Vertex(float.Parse(tmp[0]), float.Parse(tmp[1]), float.Parse(tmp[2]));
 
             confaces = new List<int>();
+            coneles = new List<int>();
 
             properties = new float[n_property];
             for (int i = 0; i < n_property; i++)
             {
                 properties[i] = float.Parse(tmp[3 + i]) / (float)255.0;
+            }
+
+            normal = new Vector3D(0, 0, 0);
+        }
+
+        public Node(float[] tmp, int n_property)
+        {
+            position = new Vertex(tmp[0], tmp[1], tmp[2]);
+
+            confaces = new List<int>();
+            coneles = new List<int>();
+
+            properties = new float[n_property];
+            for (int i = 0; i < n_property; i++)
+            {
+                properties[i] = (float)tmp[3 + i] / (float)255.0;
             }
 
             normal = new Vector3D(0, 0, 0);
@@ -55,6 +73,16 @@ namespace HY_MeshViewer.Model
         public void setConfaces(int t)
         {
             confaces.Add(t);
+        }
+
+        public List<int> getConeles()
+        {
+            return coneles;
+        }
+
+        public void setConeles(int t)
+        {
+            coneles.Add(t);
         }
 
         public float[] getProperties()
@@ -96,13 +124,22 @@ namespace HY_MeshViewer.Model
         Vector3D normal;
         double area;
 
-        public Triangle(String[] tmp, int n_index)
+        // 생성자
+        public Triangle(String[] tmp)
         {
-            indices = new int[n_index];
-            for (int i = 0; i < n_index; i++)
+            indices = new int[3];
+            for (int i = 0; i < 3; i++)
             {
-                indices[i] = Int32.Parse(tmp[n_index - i -1]);
+                indices[i] = Int32.Parse(tmp[2 - i]);
             }
+
+            normal = new Vector3D(0, 0, 0);
+            area = 0;
+        }
+
+        public Triangle(int[] tmp)
+        {
+            indices = tmp;
 
             normal = new Vector3D(0, 0, 0);
             area = 0;
@@ -145,25 +182,54 @@ namespace HY_MeshViewer.Model
         }
     }
 
-    public struct Pyramid
+    /* tetraheadron 정보 */
+    public struct Tetrahedron
     {
         int[] indices;
-        Vector3D normal;
-        double area;
+        Triangle[] triangles;
 
-        public Pyramid(String[] tmp, int n_index)
+        public Tetrahedron(String[] tmp)
         {
-            indices = new int[n_index];
-            for (int i = 0; i < n_index; i++)
+            indices = new int[4];
+            for (int i = 0; i < 4; i++)
             {
-                indices[i] = Int32.Parse(tmp[n_index - i - 1]);
+                indices[i] = Int32.Parse(tmp[3 - i]);
             }
 
-            normal = new Vector3D(0, 0, 0);
-            area = 0;
+            triangles = null;
+        }
+
+        public Tetrahedron(int[] tmp)
+        {
+            indices = tmp;
+
+            triangles = null;
+        }
+
+        public int[] getIndices()
+        {
+            return indices;
+        }
+
+        private void TetraToTriangle()
+        {
+
         }
     }
 
+    /* electrode 정보 */
+    public struct Electrode
+    {
+
+    }
+
+    /* label 정보 */
+    public struct Label
+    {
+
+    }
+
+    /* ray 정보 */
     public struct Ray
     {
         Vector3D near;
@@ -247,28 +313,63 @@ namespace HY_MeshViewer.Model
     {
         // 데이터 파일
         public string FileName { get; set; }
+        public string SubName { get; set; }
 
-        // 데이터 관리
+        public int Flag_surface { get; set; }
+        public int Flag_electrode { get; set; }
+
+        #region before..
         public Dictionary<int, Node> Nodes
         {
             get;
-            set; }
-
+            set;
+        }
         public Dictionary<int, Triangle> Triangles
         {
             get;
-            set; }
+            set;
+        }
+        public int N_node { get; set; }
+        public int N_triangle { get; set; }
+        public int N_index { get; set; }
+        #endregion
+
+        public int N_property { get; set; }
+        
+
+        // VOLUME - HEAD
+        public int Nnode_head { get; set; }
+        public int Nele_head { get; set; }
+        public Dictionary<int, Node> Nodes_head { get; set; }
+        public Dictionary<int, Tetrahedron> Elements_head { get; set; }
+        public int[] Regions_head { get; set; }
+
+        // SCALP SURFACE
+        public int Nnode_scalp { get; set; }
+        public int Nele_scalp { get; set; }
+        public Dictionary<int, Node> Nodes_scalp { get; set; }
+        public Dictionary<int, Triangle> Elements_scalp { get; set; }
+        public int[] Traces_scalp { get; set; }
+
+        // CORTICAL SURFACE
+        public int Nnode_cortex { get; set; }
+        public int Nele_cortex { get; set; }
+        public Dictionary<int, Node> Nodes_cortex { get; set; }
+        public Dictionary<int, Triangle> Elements_cortex { get; set; }
+        public int[] Traces_cortex { get; set; }
+
+        // ELECTRODE
+        public int Nnode_electrode { get; set; }
+
+        // LABEL
+        public int Nlabel { get; set; }
+
 
         // 마우스 정보
         public Point MousePosition { get; set; }
         public Ray MouseRay { get; set; }
 
-        // mesh 정보
-        public int N_node { get; set; }
-        public int N_triangle { get; set; }
-        public int N_property { get; set; }
-        public int N_index { get; set; }
-
+        // 3D 정보
         public float RotationAngle { get; set; }
         public Vector3D RotationAxis { get; set; }
 

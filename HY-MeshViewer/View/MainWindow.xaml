@@ -164,7 +164,7 @@
                 </StatusBarItem>
                 <Separator/>
                 <StatusBarItem>
-                    <TextBlock Name="N_Triangle" Text="{Binding Path=N_triangle}"/>
+                    <TextBlock Name="N_Triangle" Text="{Binding Path=Nele_cortex}"/>
                 </StatusBarItem>
             </StatusBar>
         </DockPanel>

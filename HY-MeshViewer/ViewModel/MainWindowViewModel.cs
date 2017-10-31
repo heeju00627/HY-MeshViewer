@@ -28,11 +28,23 @@ namespace HY_MeshViewer.ViewModel
             _mesh = new Mesh
             {
                 FileName = "no file",
+                SubName = "",
+                Flag_surface = 0,
+                Flag_electrode = 0,
 
                 N_index = 0,
                 N_node = 0,
                 N_property = 0,
                 N_triangle = 0,
+
+                Nnode_head = 0,
+                Nnode_scalp = 0,
+                Nnode_cortex = 0,
+                Nnode_electrode = 0,
+
+                Nele_head = 0,
+                Nele_scalp = 0,
+                Nele_cortex = 0,
 
                 RotationAxis = new Vector3D(0, 0, 0),
                 RotationAngle = 0,
@@ -51,6 +63,7 @@ namespace HY_MeshViewer.ViewModel
             ResetCommand = new RelayCommand(ResetProperty);
         }
 
+        #region getset
         public Mesh Mesh
         {
             get { return this._mesh; }
@@ -70,7 +83,35 @@ namespace HY_MeshViewer.ViewModel
                 NotifyPropertyChanged("FileName");
             }
         }
+        public string SubName
+        {
+            get { return this._mesh.SubName; }
+            set
+            {
+                this._mesh.SubName = value;
+                NotifyPropertyChanged("SubName");
+            }
+        }
+        public int Flag_surface
+        {
+            get { return this._mesh.Flag_surface; }
+            set
+            {
+                this._mesh.Flag_surface = value;
+                NotifyPropertyChanged("Flag_surface");
+            }
+        }
+        public int Flag_electrode
+        {
+            get { return this._mesh.Flag_electrode; }
+            set
+            {
+                this._mesh.Flag_electrode = value;
+                NotifyPropertyChanged("Flag_electrode");
+            }
+        }
 
+        #region before..
         public Dictionary<int, Node> Nodes
         {
             get { return this._mesh.Nodes; }
@@ -90,25 +131,6 @@ namespace HY_MeshViewer.ViewModel
             }
         }
 
-        public Point MousePosition
-        {
-            get { return this._mesh.MousePosition; }
-            set
-            {
-                this._mesh.MousePosition = value;
-                NotifyPropertyChanged("MousePosition");
-            }
-        }
-
-        public Ray MouseRay
-        {
-            get { return this._mesh.MouseRay; }
-            set
-            {
-                this._mesh.MouseRay = value;
-                NotifyPropertyChanged("MouseRay");
-            }
-        }
 
         public int N_node
         {
@@ -144,6 +166,191 @@ namespace HY_MeshViewer.ViewModel
             {
                 this._mesh.N_index = value;
                 NotifyPropertyChanged("N_index");
+            }
+        }
+        #endregion
+
+        // VOLUME - HEAD
+        public int Nnode_head
+        {
+            get { return this._mesh.Nnode_head; }
+            set
+            {
+                this._mesh.Nnode_head = value;
+                NotifyPropertyChanged("Nnode_head");
+            }
+        }
+        public int Nele_head
+        {
+            get { return this._mesh.Nele_head; }
+            set
+            {
+                this._mesh.Nele_head = value;
+                NotifyPropertyChanged("Nele_head");
+            }
+        }
+        public Dictionary<int, Node> Nodes_head
+        {
+            get { return this._mesh.Nodes_head; }
+            set
+            {
+                this._mesh.Nodes_head = value;
+                NotifyPropertyChanged("Nodes_head");
+            }
+        }
+        public Dictionary<int, Tetrahedron> Elements_head
+        {
+            get { return this._mesh.Elements_head; }
+            set
+            {
+                this._mesh.Elements_head = value;
+                NotifyPropertyChanged("Elements_head");
+            }
+        }
+        public int[] Regions_head
+        {
+            get { return this._mesh.Regions_head; }
+            set
+            {
+                this._mesh.Regions_head = value;
+                NotifyPropertyChanged("Regions_head");
+            }
+        }
+
+        // SCALP SURFACE
+        public int Nnode_scalp
+        {
+            get { return this._mesh.Nnode_scalp; }
+            set
+            {
+                this._mesh.Nnode_scalp = value;
+                NotifyPropertyChanged("Nnode_scalp");
+            }
+        }
+        public int Nele_scalp
+        {
+            get { return this._mesh.Nele_scalp; }
+            set
+            {
+                this._mesh.Nele_scalp = value;
+                NotifyPropertyChanged("Nele_scalp");
+            }
+        }
+        public Dictionary<int, Node> Nodes_scalp
+        {
+            get { return this._mesh.Nodes_scalp; }
+            set
+            {
+                this._mesh.Nodes_scalp = value;
+                NotifyPropertyChanged("Nodes_scalp");
+            }
+        }
+        public Dictionary<int, Triangle> Elements_scalp
+        {
+            get { return this._mesh.Elements_scalp; }
+            set
+            {
+                this._mesh.Elements_scalp = value;
+                NotifyPropertyChanged("Elements_scalp");
+            }
+        }
+        public int[] Traces_scalp
+        {
+            get { return this._mesh.Traces_scalp; }
+            set
+            {
+                this._mesh.Traces_scalp = value;
+                NotifyPropertyChanged("Traces_scalp");
+            }
+        }
+
+        // CORTICAL SURFACE
+        public int Nnode_cortex
+        {
+            get { return this._mesh.Nnode_cortex; }
+            set
+            {
+                this._mesh.Nnode_cortex = value;
+                NotifyPropertyChanged("Nnode_cortex");
+            }
+        }
+        public int Nele_cortex
+        {
+            get { return this._mesh.Nele_cortex; }
+            set
+            {
+                this._mesh.Nele_cortex = value;
+                NotifyPropertyChanged("Nele_cortex");
+            }
+        }
+        public Dictionary<int, Node> Nodes_cortex
+        {
+            get { return this._mesh.Nodes_cortex; }
+            set
+            {
+                this._mesh.Nodes_cortex = value;
+                NotifyPropertyChanged("Nodes_cortex");
+            }
+        }
+        public Dictionary<int, Triangle> Elements_cortex
+        {
+            get { return this._mesh.Elements_cortex; }
+            set
+            {
+                this._mesh.Elements_cortex = value;
+                NotifyPropertyChanged("Elements_cortex");
+            }
+        }
+        public int[] Traces_cortex
+        {
+            get { return this._mesh.Traces_cortex; }
+            set
+            {
+                this._mesh.Traces_cortex = value;
+                NotifyPropertyChanged("Traces_cortex");
+            }
+        }
+
+        // ELECTRODE
+        public int Nnode_electrode
+        {
+            get { return this._mesh.Nnode_electrode; }
+            set
+            {
+                this._mesh.Nnode_electrode = value;
+                NotifyPropertyChanged("Nnode_electrode");
+            }
+        }
+
+        // LABEL
+        public int Nlabel
+        {
+            get { return this._mesh.Nlabel; }
+            set
+            {
+                this._mesh.Nlabel = value;
+                NotifyPropertyChanged("Nlabel");
+            }
+        }
+
+
+        public Point MousePosition
+        {
+            get { return this._mesh.MousePosition; }
+            set
+            {
+                this._mesh.MousePosition = value;
+                NotifyPropertyChanged("MousePosition");
+            }
+        }
+
+        public Ray MouseRay
+        {
+            get { return this._mesh.MouseRay; }
+            set
+            {
+                this._mesh.MouseRay = value;
+                NotifyPropertyChanged("MouseRay");
             }
         }
 
@@ -216,6 +423,7 @@ namespace HY_MeshViewer.ViewModel
                 NotifyPropertyChanged("Properties");
             }
         }
+        #endregion
 
 
         #region Command
@@ -263,6 +471,7 @@ namespace HY_MeshViewer.ViewModel
         }
         #endregion
 
+        #region File
         private void OpenFile()
         {
             if (FileName != "no file")
@@ -282,72 +491,308 @@ namespace HY_MeshViewer.ViewModel
 
             OpenFileDialog openDlg = new OpenFileDialog();
 
-            openDlg.Filter = "TXT Files (*.txt)|*.*";
+            openDlg.Filter = "BIN Files (*.bin)|*.bin|TXT Files (*.txt)|*.txt|All Files (*.*)|*.*";
 
             if (openDlg.ShowDialog() == true)
             {
                 // get the path
                 FileName = openDlg.FileName;
 
-                String[] data = File.ReadAllLines(openDlg.FileName);
+                String extension = Path.GetExtension(FileName);
 
-                // 첫째줄 데이터 정보
-                String[] tmp = data[0].Split(' ');
-
-                // 올바른 file 아님
-                if (tmp.Length != 4)
+                #region txt
+                // text file
+                if (extension == ".txt")
                 {
-                    MessageBox.Show("wrong file", "Error Message", MessageBoxButton.OK, MessageBoxImage.Error);
-                    CloseFile();
-                    return;
-                }
+                    String[] data = File.ReadAllLines(openDlg.FileName);
 
-                N_node = Int32.Parse(tmp[0]);
-                N_triangle = Int32.Parse(tmp[1]);
-                N_property = Int32.Parse(tmp[2]);
-                N_index = Int32.Parse(tmp[3]);
+                    // 첫째줄 데이터 정보
+                    String[] tmp = data[0].Split(' ');
 
-                Nodes = new Dictionary<int, Node>();
-                Triangles = new Dictionary<int, Triangle>();
-
-                for (int i = 0; i < N_node; i++)
-                {
-                    tmp = data[i + 1].Split('\t');
-
-                    Node n = new Node(tmp, N_property);
-
-                    Nodes.Add(i, n);
-                }
-
-                for (int i = 0; i < N_triangle; i++)
-                {
-                    tmp = data[i + 1 + N_node].Split('\t');
-
-                    Triangle t = new Triangle(tmp, N_index);
-
-                    int[] indices = t.getIndices();
-
-                    foreach (int ind in indices)
+                    // 올바른 file 아님
+                    if (tmp.Length != 4)
                     {
-                        Nodes[ind].setConfaces(i);
+                        MessageBox.Show("wrong file", "Error Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                        CloseFile();
+                        return;
                     }
 
-                    Vector3D normal = CalculateFaceNormal(indices);
-                    t.setNormal(normal);
+                    N_node = Int32.Parse(tmp[0]);
+                    N_triangle = Int32.Parse(tmp[1]);
+                    N_property = Int32.Parse(tmp[2]);
+                    N_index = Int32.Parse(tmp[3]);
 
-                    Triangles.Add(i, t);
+                    Nodes = new Dictionary<int, Node>();
+                    Triangles = new Dictionary<int, Triangle>();
+
+                    for (int i = 0; i < N_node; i++)
+                    {
+                        tmp = data[i + 1].Split('\t');
+
+                        Node n = new Node(tmp, N_property);
+
+                        Nodes.Add(i, n);
+                    }
+
+                    for (int i = 0; i < N_triangle; i++)
+                    {
+                        tmp = data[i + 1 + N_node].Split('\t');
+
+                        Triangle t = new Triangle(tmp);
+
+                        int[] indices = t.getIndices();
+
+                        foreach (int ind in indices)
+                        {
+                            Nodes[ind].setConfaces(i);
+                        }
+
+                        Vector3D normal = CalculateFaceNormal(indices, Nodes);
+                        t.setNormal(normal);
+
+                        Triangles.Add(i, t);
+                    }
+
+                    Properties = new List<ComboBoxItem>()
+                    {
+                        new ComboBoxItem() { Name = "RGB" },
+                    };
+
+                    CalculateVertexNormal();
+
+                    ResetProperty();
                 }
-                
-                Properties = new List<ComboBoxItem>()
+                #endregion
+
+                else if (extension == ".bin")
                 {
-                    new ComboBoxItem() { Name = "RGB" },
+                    LoadModel(FileName);
 
-                };
-
-                CalculateVertexNormal();
-
-                ResetProperty();
+                    ResetProperty();
+                }
             }
+        }
+
+        void LoadModel(String FileName)
+        {
+            //try
+            //{
+                using (FileStream stream = new FileStream(FileName, FileMode.Open))
+
+            using (BinaryReader reader = new BinaryReader(stream))
+                {
+                    SubName = "";
+                    for (int i = 0; i < 100; i++)
+                    {
+                        SubName += reader.ReadChar();
+                    }
+                    Flag_surface = reader.ReadInt32();
+                    Flag_electrode = reader.ReadInt32();
+
+                    #region volume data
+                    Nnode_head = reader.ReadInt32();
+                    Nele_head = reader.ReadInt32();
+
+                    Nodes_head = new Dictionary<int, Node>();
+
+                    double[,] tmpd = new double[Nnode_head, 3];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < Nnode_head; j++)
+                        {
+                            tmpd[j, i] = reader.ReadDouble();
+                        }
+                    }
+
+                    float[] indf = new float[3];
+                    for (int i = 0; i < Nnode_head; i++)
+                    {
+                        for (int j = 0; j < 3; j++)
+                        {
+                            indf[j] = (float)tmpd[i, j];
+                        }
+                        Node n = new Node(indf, N_property);
+                        Nodes_head.Add(i + 1, n);
+                    }
+
+                    Elements_head = new Dictionary<int, Tetrahedron>();
+
+                    int[,] tmpi = new int[Nele_head, 4];
+                    for (int i = 0; i < 4; i++)
+                    {
+                        for (int j = 0; j < Nele_head; j++)
+                        {
+                            tmpi[j, i] = reader.ReadInt32();
+                        }
+                    }
+
+                    int[] indi = new int[4];
+                    for (int i = 0; i < Nele_head; i++)
+                    {
+                        for (int j = 0; j < 4; j++)
+                        {
+                            indi[j] = tmpi[i, 3 - j];
+                        }
+                        Tetrahedron t = new Tetrahedron(indi);
+
+                        foreach (int ind in indi)
+                        {
+                            Nodes_head[ind].setConfaces(i);
+                        }
+
+                        Elements_head.Add(i, t);
+                    }
+
+                    Regions_head = new int[Nele_head];
+                    for (int i = 0; i < Nele_head; i++)
+                    {
+                        Regions_head[i] = reader.ReadInt32();
+                        //writer.WriteLine(Regions_head[i]);
+                    }
+                    #endregion
+
+                    #region surface
+                    if (Flag_surface == 1)
+                    {
+                        // surface data - scalp
+                        Nnode_scalp = reader.ReadInt32();
+                        Nele_scalp = reader.ReadInt32();
+
+                        Nodes_scalp = new Dictionary<int, Node>();
+
+                        tmpd = new double[Nnode_scalp, 3];
+                        for (int i = 0; i < 3; i++)
+                        {
+                            for (int j = 0; j < Nnode_scalp; j++)
+                            {
+                                tmpd[j, i] = reader.ReadDouble();
+                            }
+                        }
+
+                        indf = new float[3];
+                        for (int i = 0; i < Nnode_scalp; i++)
+                        {
+                            for (int j = 0; j < 3; j++)
+                            {
+                                indf[j] = (float)tmpd[i, j];
+                            }
+                            Node n = new Node(indf, N_property);
+                            Nodes_scalp.Add(i + 1, n);
+                        }
+
+                        Elements_scalp = new Dictionary<int, Triangle>();
+                        tmpi = new int[Nele_scalp, 3];
+                        for (int i = 0; i < 3; i++)
+                        {
+                            for (int j = 0; j < Nele_scalp; j++)
+                            {
+                                tmpi[j, i] = reader.ReadInt32();
+                            }
+                        }
+
+                        indi = new int[3];
+                        for (int i = 0; i < Nele_scalp; i++)
+                        {
+                            for (int j = 0; j < 3; j++)
+                            {
+                                indi[j] = tmpi[i, 2 - j];
+                            }
+                            Triangle t = new Triangle(indi);
+
+                            foreach (int ind in indi)
+                            {
+                                Nodes_scalp[ind].setConfaces(i);
+                            }
+
+                            Vector3D normal = CalculateFaceNormal(indi, Nodes_scalp);
+                            t.setNormal(normal);
+
+                            Elements_scalp.Add(i, t);
+                        }
+                        
+                        Traces_scalp = new int[Nnode_scalp];
+                        for (int i = 0; i < Nnode_scalp; i++)
+                        {
+                            Traces_scalp[i] = reader.ReadInt32();
+                        }
+
+                        CalculateVertexNormal(Nnode_scalp, Nodes_scalp, Elements_scalp);
+
+                        // surface data - cortex
+                        Nnode_cortex = reader.ReadInt32();
+                        Nele_cortex = reader.ReadInt32();
+
+                        Nodes_cortex = new Dictionary<int, Node>();
+
+                        tmpd = new double[Nnode_cortex, 3];
+                        for (int i = 0; i < 3; i++)
+                        {
+                            for (int j = 0; j < Nnode_cortex; j++)
+                            {
+                                tmpd[j, i] = reader.ReadDouble();
+                            }
+                        }
+
+                        indf = new float[3];
+                        for (int i = 0; i < Nnode_cortex; i++)
+                        {
+                            for (int j = 0; j < 3; j++)
+                            {
+                                indf[j] = (float)tmpd[i, j];
+                            }
+                            Node n = new Node(indf, N_property);
+                            Nodes_cortex.Add(i + 1, n);
+                        }
+
+                        Elements_cortex = new Dictionary<int, Triangle>();
+                        tmpi = new int[Nele_cortex, 3];
+                        for (int i = 0; i < 3; i++)
+                        {
+                            for (int j = 0; j < Nele_cortex; j++)
+                            {
+                                tmpi[j, i] = reader.ReadInt32();
+                            }
+                        }
+
+                        indi = new int[3];
+                        for (int i = 0; i < Nele_cortex; i++)
+                        {
+                            for (int j = 0; j < 3; j++)
+                            {
+                                indi[j] = tmpi[i, 2 - j];
+                            }
+                            Triangle t = new Triangle(indi);
+
+                            foreach (int ind in indi)
+                            {
+                                Nodes_cortex[ind].setConfaces(i);
+                            }
+
+                            Vector3D normal = CalculateFaceNormal(indi, Nodes_cortex);
+                            t.setNormal(normal);
+
+                            Elements_cortex.Add(i, t);
+                        }
+
+                        Traces_cortex = new int[Nnode_cortex];
+                        for (int i = 0; i < Nnode_cortex; i++)
+                        {
+                            Traces_cortex[i] = reader.ReadInt32();
+                        }
+
+                        CalculateVertexNormal(Nnode_cortex, Nodes_cortex, Elements_cortex);
+                    }
+                    #endregion
+                    
+                    reader.Close();
+                    stream.Close();
+                    }
+            //}
+            /*catch
+            {
+                CloseFile();
+                return;
+            }*/
         }
 
         private void CloseFile()
@@ -376,6 +821,9 @@ namespace HY_MeshViewer.ViewModel
             Properties.Clear();
         }
 
+
+        #endregion
+
         private void ResetProperty()
         {
             TranslationX = 0;
@@ -388,7 +836,7 @@ namespace HY_MeshViewer.ViewModel
             Scale = 0.02f;
         }
 
-        private Vector3D CalculateFaceNormal(int[] indices)
+        private Vector3D CalculateFaceNormal(int[] indices, Dictionary<int, Node> Nodes)
         {
             Vector3D normal;
 
@@ -407,6 +855,32 @@ namespace HY_MeshViewer.ViewModel
         private void CalculateVertexNormal()
         {
             for (int i = 0; i < N_node; i++)
+            {
+                Node n = Nodes[i];
+
+                List<int> cons = n.getConfaces();
+                if (cons.Count() == 1)
+                {
+                    int t = cons.First();
+                    n.setNormal(Triangles[t].getNormal());
+                }
+                else
+                {
+                    Vector3D normal = new Vector3D(0, 0, 0);
+                    foreach (int c in cons)
+                    {
+                        normal += Triangles[c].getArea() * Triangles[c].getNormal();
+                    }
+
+                    n.Normalize(normal);
+                }
+                Nodes[i] = n;
+            }
+        }
+
+        private void CalculateVertexNormal(int N_node, Dictionary<int, Node> Nodes, Dictionary<int, Triangle> Triangles)
+        {
+            for (int i = 1; i <= N_node; i++)
             {
                 Node n = Nodes[i];
 
