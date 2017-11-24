@@ -139,7 +139,11 @@ namespace HY_MeshViewer.Model
 
         public Triangle(int[] tmp)
         {
-            indices = tmp;
+            indices = new int[3];
+            for (int i = 0; i < 3; i++)
+            {
+                indices[i] = tmp[i];
+            }
 
             normal = new Vector3D(0, 0, 0);
             area = 0;
@@ -201,7 +205,12 @@ namespace HY_MeshViewer.Model
 
         public Tetrahedron(int[] tmp)
         {
-            indices = tmp;
+            indices = new int[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                indices[i] = tmp[3 - i];
+            }
 
             triangles = null;
         }
@@ -220,13 +229,68 @@ namespace HY_MeshViewer.Model
     /* electrode 정보 */
     public struct Electrode
     {
+        int n_face;
+        int[,] faces; // 3 nodes + element
 
+        // 생성자
+        public Electrode(int n_face, int[,] tmp)
+        {
+            this.n_face = n_face;
+
+            faces = new int[n_face, 4];
+            for (int i = 0; i < n_face; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    faces[i, j] = tmp[i, j];
+                }
+            }
+        }
+
+        public int getNode(int i)
+        {
+            return faces[i, 0];
+        }
     }
 
     /* label 정보 */
     public struct Label
     {
+        string name;
+        string part;
+        int n_node;
+        HashSet<int> nodes;
 
+        public Label(string name, string part, int n_node, int[] tmp)
+        {
+            this.name = name;
+            this.part = part;
+            this.n_node = n_node;
+
+            nodes = new HashSet<int>();
+            for (int i = 0; i < n_node; i++)
+            {
+                nodes.Add(tmp[i]);
+            }
+        }
+
+        public bool isLabel(int[] n)
+        {
+            if (nodes.Contains(n[0]) || nodes.Contains(n[1]) || nodes.Contains(n[2]))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public string[] getInfo()
+        {
+            string[] s = { name, part, n_node.ToString() };
+            return s;
+        }
     }
 
     /* ray 정보 */
@@ -335,7 +399,8 @@ namespace HY_MeshViewer.Model
         #endregion
 
         public int N_property { get; set; }
-        
+
+        public int Mode_normal { get; set; }
 
         // VOLUME - HEAD
         public int Nnode_head { get; set; }
@@ -360,10 +425,17 @@ namespace HY_MeshViewer.Model
 
         // ELECTRODE
         public int Nnode_electrode { get; set; }
+        public int[] Nodes_electrode { get; set; }
+        public int N_electrode { get; set; }
+        public Dictionary<int, Electrode> Electrodes { get; set; }
+
+        public double[] Values_electrode { get; set; }
 
         // LABEL
-        public int Nlabel { get; set; }
-
+        public int N_label { get; set; }
+        public Dictionary<int, Label> Labels { get; set; }
+        
+        public int Hit_label { get; set; }
 
         // 마우스 정보
         public Point MousePosition { get; set; }

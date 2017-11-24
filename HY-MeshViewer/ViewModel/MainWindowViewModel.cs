@@ -41,6 +41,7 @@ namespace HY_MeshViewer.ViewModel
                 Nnode_scalp = 0,
                 Nnode_cortex = 0,
                 Nnode_electrode = 0,
+                N_electrode = 0,
 
                 Nele_head = 0,
                 Nele_scalp = 0,
@@ -49,12 +50,13 @@ namespace HY_MeshViewer.ViewModel
                 RotationAxis = new Vector3D(0, 0, 0),
                 RotationAngle = 0,
 
-                TranslationX = 0,
-                TranslationY = 0,
+                TranslationX = 0.0f,
+                TranslationY = 0.0f,
                 TranslationZ = -6.0f,
 
                 Scale = 0.02f,
 
+                MouseRay = new Ray(-1),
                 Properties = new List<ComboBoxItem>(),
             };
 
@@ -169,6 +171,16 @@ namespace HY_MeshViewer.ViewModel
             }
         }
         #endregion
+
+        public int Mode_normal
+        {
+            get { return this._mesh.Mode_normal; }
+            set
+            {
+                this._mesh.Mode_normal = value;
+                NotifyPropertyChanged("Mode_normal");
+            }
+        }
 
         // VOLUME - HEAD
         public int Nnode_head
@@ -322,18 +334,78 @@ namespace HY_MeshViewer.ViewModel
             }
         }
 
-        // LABEL
-        public int Nlabel
+        public int[] Nodes_electrode
         {
-            get { return this._mesh.Nlabel; }
+            get { return this._mesh.Nodes_electrode; }
             set
             {
-                this._mesh.Nlabel = value;
-                NotifyPropertyChanged("Nlabel");
+                this._mesh.Nodes_electrode = value;
+                NotifyPropertyChanged("Nodes_electrode");
             }
         }
 
+        public int N_electrode
+        {
+            get { return this._mesh.N_electrode; }
+            set
+            {
+                this._mesh.N_electrode = value;
+                NotifyPropertyChanged("N_electrode");
+            }
+        }
 
+        public Dictionary<int, Electrode> Electrodes
+        {
+            get { return this._mesh.Electrodes; }
+            set
+            {
+                this._mesh.Electrodes = value;
+                NotifyPropertyChanged("Electrodes");
+            }
+        }
+
+        public double[] Values_electrode
+        {
+            get { return this._mesh.Values_electrode; }
+            set
+            {
+                this._mesh.Values_electrode = value;
+                NotifyPropertyChanged("Values_electrode");
+            }
+        }
+
+        // LABEL
+        public int N_label
+        {
+            get { return this._mesh.N_label; }
+            set
+            {
+                this._mesh.N_label = value;
+                NotifyPropertyChanged("N_label");
+            }
+        }
+        
+        public Dictionary<int, HY_MeshViewer.Model.Label> Labels
+        {
+            get { return this._mesh.Labels; }
+            set
+            {
+                this._mesh.Labels = value;
+                NotifyPropertyChanged("Labels");
+            }
+        }
+
+        public int Hit_label
+        {
+            get { return this._mesh.Hit_label; }
+            set
+            {
+                this._mesh.Hit_label = value;
+                NotifyPropertyChanged("Hit_label");
+            }
+        }
+
+        // 마우스 정보
         public Point MousePosition
         {
             get { return this._mesh.MousePosition; }
@@ -440,6 +512,12 @@ namespace HY_MeshViewer.ViewModel
         }
 
         public ICommand ResetCommand
+        {
+            get;
+            set;
+        }
+
+        public ICommand ElectrodeCommand
         {
             get;
             set;
@@ -567,13 +645,13 @@ namespace HY_MeshViewer.ViewModel
                 else if (extension == ".bin")
                 {
                     LoadModel(FileName);
-
+                    LoadLabel("D:\\HY-MeshViewer\\labels.bin");
                     ResetProperty();
                 }
             }
         }
 
-        void LoadModel(String FileName)
+        private void LoadModel(String FileName)
         {
             //try
             //{
@@ -631,7 +709,7 @@ namespace HY_MeshViewer.ViewModel
                     {
                         for (int j = 0; j < 4; j++)
                         {
-                            indi[j] = tmpi[i, 3 - j];
+                            indi[j] = tmpi[i, j];
                         }
                         Tetrahedron t = new Tetrahedron(indi);
 
@@ -647,7 +725,6 @@ namespace HY_MeshViewer.ViewModel
                     for (int i = 0; i < Nele_head; i++)
                     {
                         Regions_head[i] = reader.ReadInt32();
-                        //writer.WriteLine(Regions_head[i]);
                     }
                     #endregion
 
@@ -697,6 +774,7 @@ namespace HY_MeshViewer.ViewModel
                             {
                                 indi[j] = tmpi[i, 2 - j];
                             }
+
                             Triangle t = new Triangle(indi);
 
                             foreach (int ind in indi)
@@ -782,17 +860,101 @@ namespace HY_MeshViewer.ViewModel
 
                         CalculateVertexNormal(Nnode_cortex, Nodes_cortex, Elements_cortex);
                     }
-                    #endregion
-                    
-                    reader.Close();
-                    stream.Close();
+                #endregion
+
+                #region electrode
+                if (Flag_electrode == 1)
+                {
+                    Nnode_electrode = reader.ReadInt32();
+
+                    Nodes_electrode = new int[Nnode_electrode];
+                    for (int i = 0; i < Nnode_electrode; i++)
+                    {
+                        Nodes_electrode[i] = reader.ReadInt32();
                     }
+
+                    N_electrode = reader.ReadInt32();
+
+                    Values_electrode = new double[N_electrode];
+                    
+                    int[] n_faces = new int[N_electrode];
+                    int sum = 0;
+
+                    for (int i = 0; i < N_electrode; i++)
+                    {
+                        n_faces[i] = reader.ReadInt32();
+                        sum += n_faces[i];
+                    }
+
+                    Electrodes = new Dictionary<int, Electrode>();
+
+                    for (int k = 0; k < N_electrode; k++)
+                    {
+                        tmpi = new int[n_faces[k], 4];
+                        for (int i = 0; i < 4; i++)
+                        {
+                            for (int j = 0; j < n_faces[k]; j++)
+                            {
+                                tmpi[j, i] = reader.ReadInt32();
+                            }
+                        }
+
+                        Electrode e = new Electrode(n_faces[k], tmpi);
+                        Electrodes.Add(k, e);
+                    }
+                }
+                #endregion
+
+                reader.Close();
+                stream.Close();
+            }
             //}
             /*catch
             {
                 CloseFile();
                 return;
             }*/
+        }
+
+        private void LoadLabel(String FileName)
+        {
+            using (FileStream stream = new FileStream(FileName, FileMode.Open))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                N_label = reader.ReadInt32();
+
+                Labels = new Dictionary<int, Model.Label>();
+                
+                for (int i = 0; i < N_label; i++)
+                {
+                    string name = "";
+                    for (int j = 0; j < 100; j++)
+                    {
+                        name += reader.ReadChar();
+                    }
+
+                    string part = "";
+                    for (int j = 0; j < 10; j++)
+                    {
+                        part += reader.ReadChar();
+                    }
+
+                    int n_node = reader.ReadInt32();
+
+                    int[] nodes = new int[n_node];
+                    for (int j = 0; j < n_node; j++)
+                    {
+                        nodes[j] = reader.ReadInt32();
+                    }
+
+                    Model.Label l = new Model.Label(name, part, n_node, nodes);
+
+                    Labels.Add(i, l);
+                }
+
+                reader.Close();
+                stream.Close();
+            }
         }
 
         private void CloseFile()
@@ -803,20 +965,15 @@ namespace HY_MeshViewer.ViewModel
             N_triangle = 0;
             N_property = 0;
             N_index = 0;
+            N_electrode = 0;
 
             Nodes = null;
             Triangles = null;
 
-            TranslationX = 0;
-            TranslationY = 0;
-            TranslationZ = -6.0f;
+            ResetProperty();
 
-            RotationAxis = new Vector3D(0, 0, 0);
-            RotationAngle = 0;
-
-            Scale = 0.02f;
-
-            MouseRay = new Ray();
+            MouseRay = new Ray(-1);
+            Values_electrode = new double[0];
 
             Properties.Clear();
         }
@@ -826,8 +983,8 @@ namespace HY_MeshViewer.ViewModel
 
         private void ResetProperty()
         {
-            TranslationX = 0;
-            TranslationY = 0;
+            TranslationX = 0.0f;
+            TranslationY = 0.0f;
             TranslationZ = -6.0f;
 
             RotationAxis = new Vector3D(0, 0, 0);

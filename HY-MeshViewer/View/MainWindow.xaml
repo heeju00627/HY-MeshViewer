@@ -16,7 +16,8 @@
     <Window.DataContext>
         <viewmodel:MainWindowViewModel x:Name="MainWindowViewModel"/>
     </Window.DataContext>
-    <Grid>
+    
+    <Grid KeyDown="OnKeyDownHandler">
         <Grid.RowDefinitions>
             <RowDefinition Name="zeroRow" Height="18" />
             <RowDefinition Name="firstRow" Height="*" />
@@ -24,10 +25,11 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="150" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
+        <DockPanel Grid.Row="0" Grid.ColumnSpan="3">
             <Menu Name="MainMenu" DockPanel.Dock="Top" >    
                 <MenuItem Name="menuFile" Header="File">
                     <MenuItem Name="submenuOpen" Header="Open" Command="{Binding OpenCommand}"/>
@@ -49,7 +51,7 @@
             </Menu>
         </DockPanel>
 
-        <DockPanel Grid.Row="1" Grid.ColumnSpan="2">
+        <DockPanel Grid.Row="1" Grid.ColumnSpan="3">
             <ToolBarTray Name="Toolbar" Visibility="Visible" DockPanel.Dock="Top">
                 <ToolBar>
                     <Button Command="Open" ToolTip="Open">
@@ -71,43 +73,59 @@
                             <GradientStop Color="White" Offset="1"/>
                         </LinearGradientBrush>
                     </StackPanel.Background>
-                    <StackPanel Margin="10">
-                        <TextBlock Text="X Position:"/>
-                        <TextBox Name="positionXTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=TranslationX}"/>
-                        <TextBlock Text="Y Position:"/>
-                        <TextBox Name="positionYTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=TranslationY}"/>
-                        <TextBlock Text="Z Position:"/>
-                        <TextBox Name="positionZTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=TranslationZ}"/>
+                    <StackPanel Margin="15">
+                        <RadioButton Name="moveRadioButton" IsChecked="False" Margin="2">Move(A)</RadioButton>
+                        <RadioButton Name="rotateRadioButton" IsChecked="True" Margin="2">Rotate(S)</RadioButton>
+                        <RadioButton Name="zoomRadioButton" IsChecked="False" Margin="2">Zoom(D)</RadioButton>
+                        <Button Name="resetViewButton" Command="{Binding ResetCommand}" Margin="10">Reset View</Button>
                         <Separator/>
-                        <TextBlock Text="Rotation Angle:"/>
-                        <TextBox Name="rotationAngleTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=RotationAngle}"/>
-                        <TextBlock Text="Rotation X:"/>
-                        <TextBox Name="rotationXTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=RotationAxis.X}"/>
-                        <TextBlock Text="Rotation Y:"/>
-                        <TextBox Name="rotationYTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=RotationAxis.Y}"/>
-                        <TextBlock Text="Rotation Z:"/>
-                        <TextBox Name="rotationZTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=RotationAxis.Z}"/>
-                        <TextBlock Text="Scale:"/>
-                        <TextBox Name="scaleTextBox" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Path=Scale}"/>
-                        <Separator/>
-                        <Button Name="resetButton" Command="{Binding ResetCommand}">Reset</Button>
-                        <Separator />
-                        <CheckBox Name="coloringCheckBox" Content="Coloring"></CheckBox>
-                        <ComboBox x:Name="propertyColorComboBox" Width="100" ItemsSource="{Binding Path=Properties}" DisplayMemberPath="name" SelectedValuePath="value"></ComboBox>
+                        <CheckBox Name="coloringCheckBox" Content="Coloring" Margin="5"></CheckBox>
+                        <ComboBox x:Name="propertyColorComboBox" Width="100" Margin="5" ItemsSource="{Binding Path=Properties}" DisplayMemberPath="name" SelectedValuePath="value"></ComboBox>
                         <Border Background="{Binding ElementName=CB, Path=Brush}"/>
-                        <ncore:ColorBox x:Name="colorBox" Grid.Column="1" Margin="10, 0, 0, 0" VerticalAlignment="Top"></ncore:ColorBox>
+                        <ncore:ColorBox x:Name="colorBox" Grid.Column="1" Margin="5" VerticalAlignment="Top"></ncore:ColorBox>
                         <Separator />
-                        <CheckBox Name="cullfaceCheckBox" Content="Cull Face"></CheckBox>
-                        <ComboBox x:Name="polygonModeComboBox" Width="100" SelectedIndex="2" SelectionChanged="comboBoxPolygonMode_SelectionChanged">
+                        <ComboBox x:Name="polygonModeComboBox" Width="100" Margin="5" SelectedIndex="2" SelectionChanged="comboBoxPolygonMode_SelectionChanged">
                             <ComboBoxItem>Points</ComboBoxItem>
                             <ComboBoxItem>Lines</ComboBoxItem>
                             <ComboBoxItem>Polygons</ComboBoxItem>
                         </ComboBox>
+                        <ComboBox x:Name="normalModeComboBox" Width="100" Margin="5" SelectedIndex="0" SelectionChanged="comboBoxNormalMode_SelectionChanged">
+                            <ComboBoxItem>Face Normal</ComboBoxItem>
+                            <ComboBoxItem>Vertex Normal</ComboBoxItem>
+                        </ComboBox>
                         <Separator />
-                        <RadioButton Name="faceNormalRadioButton" Content="Face Normal" IsChecked="True"></RadioButton>
-                        <RadioButton Name="vertexNormalRadioButton" Content="Vertex Normal"></RadioButton>
+                        <Button Name="electrodeButton" Click="ElectrodeButton_Click" Margin="10">Electrode>></Button>
                     </StackPanel>
                 </StackPanel>
+            </Grid>
+
+            <Grid Name="ElectrodeControl" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Name="zeroElectrodeRow" Height="*"/>
+                    <RowDefinition Name="firstElectrodeRow" Height="40"/>
+                    <RowDefinition Name="secondElectrodeRow" Height="40"/>
+                </Grid.RowDefinitions>
+
+                <Grid.Background>
+                    <LinearGradientBrush>
+                        <GradientStop Color="White" Offset="0"/>
+                        <GradientStop Color="FloralWhite" Offset=".3"/>
+                        <GradientStop Color="FloralWhite" Offset=".7"/>
+                        <GradientStop Color="White" Offset="1"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0" Margin="15">
+                    <Grid Name="ContentGrid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ScrollViewer>
+
+                <Button Name="applyButton" Grid.Row="1" IsDefault="True" Margin="8" Click="ApplyButton_Click">Apply</Button>
+                <Button Name="resetValuesButton" Grid.Row="2" IsDefault="True" Margin="8" Click="ResetValuesButton_Click">Reset Values</Button>
             </Grid>
 
             <Grid Name="ViewerControl" Visibility="Visible">
@@ -117,21 +135,20 @@
                     <RowDefinition Name="secondViewerRow" Height="18" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="18" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="18" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.LayoutTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="scaleTransform"/>
+                        <RotateTransform x:Name="rotateTransform"/>
+                    </TransformGroup>
+                </Grid.LayoutTransform>
 
-                <DockPanel Grid.Row="1" Grid.Column="1">
-                    <Grid Name="content" Background="White">
-                        <Grid.LayoutTransform>
-                            <TransformGroup>
-                                <ScaleTransform x:Name="scaleTransform"/>
-                                <RotateTransform x:Name="rotateTransform"/>
-                            </TransformGroup>
-                        </Grid.LayoutTransform>
-                        <sharpGL:OpenGLControl Name="openGlControl"
-                            OpenGLDraw="OpenGLControl_OpenGLDraw" OpenGLInitialized="OpenGLControl_OpenGLInitialized"
+                <DockPanel Grid.Row="1" Grid.Column="0">
+                    <Grid Name="content1" Background="White">
+                        <sharpGL:OpenGLControl Name="openGlControl1"
+                            OpenGLDraw="OpenGLControl_OpenGLDraw1" OpenGLInitialized="OpenGLControl_OpenGLInitialized1"
                             DrawFPS="True" RenderContextType="FBO"
                             MouseMove="OpenGlControl_MouseMove" MouseLeftButtonDown="OpenGlControl_MouseLeftButtonDown"
                                                MouseLeftButtonUp="OpenGlControl_MouseLeftButtonUp" MouseRightButtonDown="OpenGlControl_MouseRightButtonDown"
@@ -139,21 +156,22 @@
                     </Grid>
                 </DockPanel>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="13,0,0,0">x</TextBlock>
-                <TextBlock Grid.Row="0" Grid.Column="2" Margin="6,3,0,0">y</TextBlock>
-                <TextBlock Grid.Row="2" Grid.Column="2" Margin="0,0,13,0">z</TextBlock>
-                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,-6,0,0">+-</TextBlock>
-
-                <Slider Grid.Row="1" Grid.Column="0" Name="zoomSlider" ToolTipService.ToolTip="zoomSlider" Orientation="Vertical" Minimum="0.02" Maximum="1" Value="{Binding Scale}"/>
-                <Slider Grid.Row="0" Grid.Column="1" Name="xSlider" ToolTipService.ToolTip="xSlider" Orientation="Horizontal" Minimum="-180" Maximum="180" Value="{Binding RotationX}"/>
-                <Slider Grid.Row="1" Grid.Column="2" Name="ySlider" ToolTipService.ToolTip="ySlider" Orientation="Vertical" Minimum="-180" Maximum="180" Value="{Binding RotationY}"/>
-                <Slider Grid.Row="2" Grid.Column="1" Name="zSlider" ToolTipService.ToolTip="zSlider" Orientation="Horizontal" Minimum="-180" Maximum="180" Value="{Binding RotationZ}"/>
+                <DockPanel Grid.Row="1" Grid.Column="1">
+                    <Grid Name="content2" Background="White">
+                        <sharpGL:OpenGLControl Name="openGlControl2"
+                            OpenGLDraw="OpenGLControl_OpenGLDraw2" OpenGLInitialized="OpenGLControl_OpenGLInitialized2"
+                            DrawFPS="True" RenderContextType="FBO"
+                            MouseMove="OpenGlControl_MouseMove" MouseLeftButtonDown="OpenGlControl_MouseLeftButtonDown"
+                                               MouseLeftButtonUp="OpenGlControl_MouseLeftButtonUp" MouseRightButtonDown="OpenGlControl_MouseRightButtonDown"
+                                               MouseRightButtonUp="OpenGlControl_MouseRightButtonUp"/>
+                    </Grid>
+                </DockPanel>
             </Grid>
 
         </DockPanel>
 
 
-        <DockPanel Name="Statusbar" Visibility="Visible" Grid.Row="2" Grid.ColumnSpan="2" >
+        <DockPanel Name="Statusbar" Visibility="Visible" Grid.Row="2" Grid.ColumnSpan="3" >
             <StatusBar DockPanel.Dock="Top">
                 <StatusBarItem>
                     <TextBlock Name="Position" Text="{Binding Path=MousePosition}"/>
