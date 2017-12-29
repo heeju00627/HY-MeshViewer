@@ -34,7 +34,7 @@ namespace HY_MeshViewer.ViewModel
 
                 N_index = 0,
                 N_node = 0,
-                N_property = 0,
+                N_property = 3,
                 N_triangle = 0,
 
                 Nnode_head = 0,
@@ -53,6 +53,8 @@ namespace HY_MeshViewer.ViewModel
                 TranslationX = 0.0f,
                 TranslationY = 0.0f,
                 TranslationZ = -6.0f,
+
+                Hit_label = -1,
 
                 Scale = 0.02f,
 
@@ -374,6 +376,26 @@ namespace HY_MeshViewer.ViewModel
             }
         }
 
+        public double[,,] Field_electric
+        {
+            get { return this._mesh.Field_electric; }
+            set
+            {
+                this._mesh.Field_electric = value;
+                NotifyPropertyChanged("Field_electric");
+            }
+        }
+
+        public double[,] Field_result
+        {
+            get { return this._mesh.Field_result; }
+            set
+            {
+                this._mesh.Field_result = value;
+                NotifyPropertyChanged("Field_result");
+            }
+        }
+
         // LABEL
         public int N_label
         {
@@ -646,6 +668,8 @@ namespace HY_MeshViewer.ViewModel
                 {
                     LoadModel(FileName);
                     LoadLabel("D:\\HY-MeshViewer\\labels.bin");
+                    LoadField("D:\\HY-MeshViewer\\EFieldMatrix.bin");
+                    LoadResult("D:\\HY-MeshViewer\\result_field.bin");
                     ResetProperty();
                 }
             }
@@ -957,18 +981,64 @@ namespace HY_MeshViewer.ViewModel
             }
         }
 
+        private void LoadField(String FileName)
+        {
+            using (FileStream stream = new FileStream(FileName, FileMode.Open))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                Field_electric = new double[N_electrode - 1, 3, Nnode_cortex];
+
+                for (int i = 0; i < Nnode_cortex; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        for (int k = 0; k < N_electrode - 1; k++)
+                        {
+                            Field_electric[k, j, i] = reader.ReadDouble();
+                        }
+                    }
+                }
+
+                reader.Close();
+                stream.Close();
+            }
+        }
+
+        private void LoadResult(String FileName)
+        {
+            using (FileStream stream = new FileStream(FileName, FileMode.Open))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                Field_result = new double[N_label, N_electrode];
+
+                for (int i = 0; i < N_electrode; i++)
+                {
+                    for (int j = 0; j < N_label; j++)
+                    {
+                        Field_result[j, i] = reader.ReadDouble();
+                    }
+                }
+
+                reader.Close();
+                stream.Close();
+            }
+        }
+
+
         private void CloseFile()
         {
             FileName = "no file";
 
             N_node = 0;
             N_triangle = 0;
-            N_property = 0;
+            N_property = 3;
             N_index = 0;
             N_electrode = 0;
 
             Nodes = null;
             Triangles = null;
+
+            Hit_label = -1;
 
             ResetProperty();
 
@@ -1058,6 +1128,90 @@ namespace HY_MeshViewer.ViewModel
                     n.Normalize(normal);
                 }
                 Nodes[i] = n;
+            }
+        }
+
+        public void SetValuesElectrode(int label)
+        {
+            for (int i = 0; i < N_electrode; i++)
+            {
+                Values_electrode[i] = Field_result[label, i];
+            }
+        }
+
+        public void CalculateField()
+        {
+            double min = int.MaxValue;
+            double max = int.MinValue;
+
+            double[] sizes = new double[Nnode_cortex];
+
+            for (int i = 0; i < Nnode_cortex; i++)
+            {
+                Node n = Nodes_cortex[i + 1];
+
+                double a = 0;
+                double b = 0;
+                double c = 0;
+
+                for (int j = 1; j < N_electrode; j++)
+                {
+                    a += Values_electrode[j] * Field_electric[j - 1, 0, i];
+                    b += Values_electrode[j] * Field_electric[j - 1, 1, i];
+                    c += Values_electrode[j] * Field_electric[j - 1, 2, i];
+                }
+
+                double size = Math.Sqrt(Math.Pow(a, 2) + Math.Pow(b, 2) + Math.Pow(c, 2));
+                sizes[i] = size;
+
+                if (min > size) min = size;
+                if (max < size) max = size;
+            }
+
+            // 0,0,1 -> 0,1,1 -> 0,1,0 -> 1,1,0 -> 1,0,0
+            // 0.0   -> 0.25  -> 0.5   -> 0.75  -> 1.0
+            for (int i = 0; i < Nnode_cortex; i++)
+            {
+                Node n = Nodes_cortex[i + 1];
+                sizes[i] = (sizes[i] - min) / max;
+                double r = 0;
+                double g = 0;
+                double b = 0;
+
+                if (sizes[i] >= 0.75)
+                {
+                    r = 1;
+                    g = 1;
+                    b = 0;
+
+                    g -= (sizes[i] - 0.75) * 4;
+                }
+                else if (sizes[i] >= 0.5)
+                {
+                    r = 0;
+                    g = 1;
+                    b = 0;
+
+                    r += (sizes[i] - 0.5) * 4;
+                }
+                else if (sizes[i] >= 0.25)
+                {
+                    r = 0;
+                    g = 1;
+                    b = 1;
+
+                    b -= (sizes[i] - 0.25) * 4;
+                }
+                else
+                {
+                    r = 0;
+                    g = 0;
+                    b = 1;
+
+                    g += sizes[i] * 4;
+                }
+
+                n.setProperties((float)r, (float)g, (float)b);
             }
         }
     }

@@ -52,10 +52,6 @@ namespace HY_MeshViewer.Model
             coneles = new List<int>();
 
             properties = new float[n_property];
-            for (int i = 0; i < n_property; i++)
-            {
-                properties[i] = (float)tmp[3 + i] / (float)255.0;
-            }
 
             normal = new Vector3D(0, 0, 0);
         }
@@ -88,6 +84,13 @@ namespace HY_MeshViewer.Model
         public float[] getProperties()
         {
             return properties;
+        }
+
+        public void setProperties(float a, float b, float c)
+        {
+            properties[0] = a;
+            properties[1] = b;
+            properties[2] = c;
         }
 
         public Vector3D getNormal()
@@ -430,6 +433,8 @@ namespace HY_MeshViewer.Model
         public Dictionary<int, Electrode> Electrodes { get; set; }
 
         public double[] Values_electrode { get; set; }
+        public double[,,] Field_electric { get; set; }
+        public double[,] Field_result { get; set; }
 
         // LABEL
         public int N_label { get; set; }

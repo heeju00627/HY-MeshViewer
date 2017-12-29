@@ -47,6 +47,86 @@ namespace ConsoleApp1
         int[] nnode_label;
         int[][] nodes_label;
 
+        /* field */
+        double[,,] field_electric;
+        double[,] field_result;
+
+        void LoadField()
+        {
+            FileStream stream = new FileStream("D:\\HY-MeshViewer\\ConsoleApp1\\EFieldMatrix.bin", FileMode.Open);
+
+            StreamWriter writer = new StreamWriter(new FileStream("D:\\HY-MeshViewer\\ConsoleApp1\\EFieldMatrix.txt", FileMode.Create));
+            BinaryReader reader = new BinaryReader(stream);
+
+            writer.WriteLine(reader.BaseStream.Length);
+
+            int N_electrode = 32;
+            int Nnode_cortex = 93870;
+
+            field_electric = new double[N_electrode - 1, 3, Nnode_cortex];
+
+            for (int i = 0; i < Nnode_cortex; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    for (int k = 0; k < N_electrode - 1; k++)
+                    {
+                        field_electric[k, j, i] = reader.ReadDouble();
+                    }
+                }
+            }
+
+            for (int i = 0; i < N_electrode -1; i++)
+            {
+                writer.WriteLine((i + 1) + " electrode");
+                for (int j = 0; j < 40; j++)
+                {
+                    writer.Write(j + " node : ");
+                    for (int k = 0; k < 3; k++)
+                    {
+                        writer.Write(field_electric[i, k, j] + " ");
+                    }
+                    writer.WriteLine();
+                }
+            }
+        }
+
+        void LoadResult()
+        {
+            FileStream stream = new FileStream("D:\\HY-MeshViewer\\ConsoleApp1\\result_field.bin", FileMode.Open);
+
+            StreamWriter writer = new StreamWriter(new FileStream("D:\\HY-MeshViewer\\ConsoleApp1\\result_field.txt", FileMode.Create));
+            BinaryReader reader = new BinaryReader(stream);
+
+            writer.WriteLine(reader.BaseStream.Length);
+
+            int N_label = 72;
+            int N_electrode = 32;
+
+            field_result = new double[N_label, N_electrode];
+
+            for (int i = 0; i < N_electrode; i++)
+            {
+                for (int j = 0; j < N_label; j++)
+                {
+                    field_result[j, i] = reader.ReadDouble();
+                }
+            }
+
+            for (int i = 0; i < N_label; i++)
+            {
+                writer.WriteLine((i + 1) + " label ");
+                for (int j = 0; j < N_electrode; j++)
+                {
+                    writer.WriteLine(field_result[i, j]);
+                }
+            }
+
+            writer.Close();
+            reader.Close();
+            stream.Close();
+        }
+
         void LoadModel()
         {
             FileStream stream = new FileStream("D:\\HY-MeshViewer\\ConsoleApp1\\defaultmodel.bin", FileMode.Open);
@@ -312,8 +392,8 @@ namespace ConsoleApp1
         {
             Program p= new Program();
 
-            p.LoadModel();
-            p.LoadLabel();
+            //p.LoadField();
+            p.LoadResult();
         }    
     }
 }

@@ -426,6 +426,80 @@ namespace HY_MeshViewer.View
             gl.ShadeModel(OpenGL.GL_SMOOTH);
         }
 
+        private void OpenGLControl_OpenGLInitialized3(object sender, OpenGLEventArgs args)
+        {
+            OpenGL gl = args.OpenGL;
+
+            // 가려진 면 제거
+            gl.Enable(OpenGL.GL_DEPTH_TEST);
+            gl.DepthFunc(OpenGL.GL_LEQUAL);
+            gl.Enable(OpenGL.GL_NORMALIZE);
+
+            uint[] lights = new uint[] { OpenGL.GL_LIGHT0, OpenGL.GL_LIGHT1, OpenGL.GL_LIGHT2, OpenGL.GL_LIGHT3 };
+
+            // 주변반사에 대한 물체색(흡수율)
+            float[] materialAmbient = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
+            // 확산반사에 대한 물체색(반사율)
+            float[] materialDiffuse = new float[] { 0.8f, 0.8f, 0.8f, 1.0f };
+            // 경면반사에 대한 물체색(흡수율)
+            float[] materialSpecular = new float[] { 0.3f, 0.3f, 0.3f, 1.0f };
+
+            // 전역 주변광
+            float[] global_ambient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
+
+            // 조명 위치
+            float[][] lightOpos = new float[][] { new float[] { 0f, 0f, 10000f, 1.0f }, new float[] { 0f, -10000f, 0f, 1.0f }, new float[] { 10000f, 0f, 0f, 1.0f }, new float[] { -10000f, 0f, 0f, 1.0f } };
+
+            // 주변광
+            float[] light0ambient = new float[] { 0.8f, 0.8f, 0.8f, 1.0f };
+            // 분산광
+            float[] light0diffuse = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+            // 반사광
+            float[] light0specular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+
+            // 전체적인 밝기 분포
+            float lightConstAttenuation = 2.0f;
+            // 1차 계수(거리에 따른 밝기)
+            float lightLinearAttenuation = 0.0f;
+            // 2차 계수
+            float lightQuadraticAttenuation = 0.0f;
+
+            //gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
+
+            for (int i = 0; i < 4; i++)
+            {
+                gl.Light(lights[i], OpenGL.GL_POSITION, lightOpos[i]);
+                gl.Light(lights[i], OpenGL.GL_AMBIENT, light0ambient);
+                gl.Light(lights[i], OpenGL.GL_DIFFUSE, light0diffuse);
+                gl.Light(lights[i], OpenGL.GL_SPECULAR, light0specular);
+                gl.Light(lights[i], OpenGL.GL_CONSTANT_ATTENUATION, lightConstAttenuation);
+                gl.Light(lights[i], OpenGL.GL_LINEAR_ATTENUATION, lightLinearAttenuation);
+                gl.Light(lights[i], OpenGL.GL_QUADRATIC_ATTENUATION, lightQuadraticAttenuation);
+            }
+
+            // 조명 활성화
+            gl.Enable(OpenGL.GL_LIGHTING);
+            // 조명 ON
+            for (int i = 0; i < 4; i++)
+            {
+                if (i != 0) continue;
+                gl.Enable(lights[i]);
+            }
+
+            // Enable color tracking
+            gl.Enable(OpenGL.GL_COLOR_MATERIAL);
+            gl.ColorMaterial(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE, materialDiffuse);
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT, materialAmbient);
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_DIFFUSE, materialDiffuse);
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_SPECULAR, materialSpecular);
+            gl.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_SHININESS, 100.0f);
+
+            // 매끄러운 세이딩 사용
+            gl.ShadeModel(OpenGL.GL_SMOOTH);
+        }
+
         private void DrawAxis(OpenGL gl)
         {
             gl.LineWidth(2);
@@ -488,11 +562,16 @@ namespace HY_MeshViewer.View
 
                 for (int i = 0; i < MainWindowViewModel.N_label; i++)
                 {
+
+                    // label 선택
                     if (MainWindowViewModel.Labels[i].isLabel(indices))
                     {
                         MainWindowViewModel.Hit_label = i;
 
                         string[] s = MainWindowViewModel.Labels[i].getInfo();
+
+                        MainWindowViewModel.SetValuesElectrode(i);
+                        MainWindowViewModel.CalculateField();
 
                         gl.DrawText((int)this.openGlControl2.RenderSize.Width - 300, (int)this.openGlControl2.RenderSize.Height - 20, 0, 0, 0, "Courier New", 13, "# name : " + s[0]);
                         gl.DrawText((int)this.openGlControl2.RenderSize.Width - 300, (int)this.openGlControl2.RenderSize.Height - 35, 0, 0, 0, "Courier New", 13, "# part : " + s[1]);
@@ -1178,6 +1257,321 @@ namespace HY_MeshViewer.View
 
             DrawAxis(gl);
         }
+
+        /// <summary>
+        /// Handles the OpenGLDraw event of the OpenGLControl control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="args">The <see cref="SharpGL.SceneGraph.OpenGLEventArgs"/> instance containing the event data.</param>
+        private void OpenGLControl_OpenGLDraw3(object sender, OpenGLEventArgs args)
+        {
+            if (MainWindowViewModel.FileName == "no file" && ElectrodeControl.Visibility == Visibility.Visible)
+            {
+                electrodeButton.Content = "Electrode>>";
+                ContentGrid.Children.Clear();
+                ContentGrid.RowDefinitions.Clear();
+                ElectrodeControl.Visibility = Visibility.Collapsed;
+            }
+
+            Point pos = Mouse.GetPosition(this);
+
+            Point actualPos = new Point(
+                    pos.X - this.ActualWidth / 2,
+                    pos.Y - this.ActualHeight / 2);
+
+            MainWindowViewModel.MousePosition = pos;
+
+            OpenGL gl = args.OpenGL;
+
+            /* 후면 제거
+            if (cullfaceCheckBox.IsChecked == true)
+            {
+                gl.Enable(OpenGL.GL_CULL_FACE);
+            }
+            else
+            {
+                gl.Disable(OpenGL.GL_CULL_FACE);
+            }*/
+
+            // Clear The Color And The Depth Buffer, Current Matrix
+            gl.ClearColor(255f, 255f, 255f, 0.0f);
+            //gl.ClearDepth(1.0f);
+            gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
+            gl.LoadIdentity();
+
+            SetLighting(gl);
+
+            DrawLabel(gl);
+
+
+
+            // Move Left And Into The Screen(object)
+            gl.Translate(MainWindowViewModel.TranslationX, MainWindowViewModel.TranslationY, MainWindowViewModel.TranslationZ);
+
+            double scale = MainWindowViewModel.Scale;
+            gl.Scale(scale, scale, scale);
+
+            gl.Rotate(MainWindowViewModel.RotationAngle, MainWindowViewModel.RotationAxis.X, MainWindowViewModel.RotationAxis.Y, MainWindowViewModel.RotationAxis.Z);
+
+
+            gl.LookAt(-6.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+
+            if (System.IO.Path.GetExtension(MainWindowViewModel.FileName) == ".txt")
+            {
+                if (MainWindowViewModel.Triangles != null && MainWindowViewModel.Nodes != null)
+                {
+                    gl.InitNames();
+                    gl.PushName(0);
+
+                    gl.Begin(OpenGL.GL_TRIANGLES);                  // Start Drawing
+
+                    // Color Mode
+                    if (coloringCheckBox.IsChecked == true)
+                    {
+                        // Vertex normal
+                        if (this.MainWindowViewModel.Mode_normal == 1)
+                        {
+                            int count = MainWindowViewModel.N_triangle;
+                            for (int i = 0; i < count; i++)
+                            {
+                                Triangle t = MainWindowViewModel.Triangles[i];
+                                int[] indices = t.getIndices();
+
+                                gl.LoadName((uint)i);
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes[ind];
+
+                                    Vector3D normal = n.getNormal();
+
+                                    gl.Normal(normal.X, normal.Y, normal.Z);
+                                    gl.Color(n.getProperties());
+                                    gl.Vertex(n.getPosition());
+                                }
+                            }
+                        }
+                        // Face normal
+                        else
+                        {
+                            int count = MainWindowViewModel.N_triangle;
+                            for (int i = 0; i < count; i++)
+                            {
+                                Triangle t = MainWindowViewModel.Triangles[i];
+                                int[] indices = t.getIndices();
+
+                                Vector3D normal = t.getNormal();
+
+                                gl.LoadName((uint)i);
+                                gl.Normal(normal.X, normal.Y, normal.Z);
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes[ind];
+
+                                    gl.Color(n.getProperties());
+                                    gl.Vertex(n.getPosition());
+                                }
+                            }
+                        }
+                    }
+                    // NonColor Mode
+                    else
+                    {
+                        gl.Color(0.5f, 0.5f, 0.5f);
+                        // Vertex normal
+                        if (this.MainWindowViewModel.Mode_normal == 1)
+                        {
+                            int count = MainWindowViewModel.N_triangle;
+                            for (int i = 0; i < count; i++)
+                            {
+                                Triangle t = MainWindowViewModel.Triangles[i];
+                                int[] indices = t.getIndices();
+
+                                gl.LoadName((uint)i);
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes[ind];
+
+                                    Vector3D normal = n.getNormal();
+
+                                    gl.Normal(normal.X, normal.Y, normal.Z);
+                                    gl.Vertex(n.getPosition());
+                                }
+                            }
+                        }
+
+                        // Face normal
+                        else
+                        {
+                            int count = MainWindowViewModel.N_triangle;
+                            for (int i = 0; i < count; i++)
+                            {
+                                Triangle t = MainWindowViewModel.Triangles[i];
+                                int[] indices = t.getIndices();
+                                Vector3D normal = t.getNormal();
+
+                                gl.LoadName((uint)i);
+                                gl.Normal(normal.X, normal.Y, normal.Z);
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes[ind];
+
+                                    gl.Vertex(n.getPosition());
+                                }
+                            }
+                        }
+                    }
+
+                    gl.End();
+                }
+            }
+
+            else if (System.IO.Path.GetExtension(MainWindowViewModel.FileName) == ".bin")
+            {
+                if (MainWindowViewModel.Flag_surface == 1)
+                {
+                    gl.InitNames();
+                    gl.PushName(0);
+
+                    gl.Begin(OpenGL.GL_TRIANGLES);
+                    // Start Drawing
+
+                    int hitface = MainWindowViewModel.MouseRay.getHitFace();
+
+                    // Color Mode
+                    if (hitface != -1)
+                    {
+                        gl.Color(1.0f, 0.0f, 0.0f);
+                        // Vertex normal
+                        if (this.MainWindowViewModel.Mode_normal == 1)
+                        {
+                            int count = MainWindowViewModel.Nele_cortex;
+                            for (int i = 0; i < count; i++)
+                            {
+                                Triangle t = MainWindowViewModel.Elements_cortex[i];
+                                int[] indices = t.getIndices();
+
+                                gl.LoadName((uint)i);
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes_cortex[ind];
+
+                                    Vector3D normal = n.getNormal();
+
+                                    gl.Normal(normal.X, normal.Y, normal.Z);
+                                    gl.Color(n.getProperties());
+                                    gl.Vertex(n.getPosition());
+                                }
+                            }
+                        }
+
+                        // Face normal
+                        else
+                        {
+                            int count = MainWindowViewModel.Nele_cortex;
+                            for (int i = 0; i < count; i++)
+                            {
+                                Triangle t = MainWindowViewModel.Elements_cortex[i];
+                                int[] indices = t.getIndices();
+
+                                Vector3D normal = t.getNormal();
+
+                                gl.LoadName((uint)i);
+                                gl.Normal(normal.X, normal.Y, normal.Z);
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes_cortex[ind];
+
+                                    gl.Color(n.getProperties());
+                                    gl.Vertex(n.getPosition());
+                                }
+                            }
+                        }
+                    }
+                    
+                    // NonColor Mode
+                    else
+                    {
+                        int hitlabel = MainWindowViewModel.Hit_label;
+
+                        gl.Color(0.5f, 0.5f, 0.5f);
+                        // Vertex normal
+                        if (this.MainWindowViewModel.Mode_normal == 1)
+                        {
+                            int count = MainWindowViewModel.Nele_cortex;
+                            for (int i = 0; i < count; i++)
+                            {
+                                Triangle t = MainWindowViewModel.Elements_cortex[i];
+                                int[] indices = t.getIndices();
+
+                                gl.LoadName((uint)i);
+
+                                if (hitlabel != -1 && MainWindowViewModel.Labels[hitlabel].isLabel(indices))
+                                {
+                                    gl.Color(0.0f, 0.0f, 0.0f);
+                                }
+                                else
+                                {
+                                    gl.Color(0.5f, 0.5f, 0.5f);
+                                }
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes_cortex[ind];
+
+                                    Vector3D normal = n.getNormal();
+
+                                    gl.Normal(normal.X, normal.Y, normal.Z);
+                                    gl.Vertex(n.getPosition());
+                                }
+                            }
+                        }
+
+                        // Face normal
+                        else
+                        {
+                            int count = MainWindowViewModel.Nele_cortex;
+                            for (int i = 0; i < count; i++)
+                            {
+                                Triangle t = MainWindowViewModel.Elements_cortex[i];
+                                int[] indices = t.getIndices();
+                                Vector3D normal = t.getNormal();
+
+                                gl.LoadName((uint)i);
+                                gl.Normal(normal.X, normal.Y, normal.Z);
+
+                                if (hitlabel != -1 && MainWindowViewModel.Labels[hitlabel].isLabel(indices))
+                                {
+                                    gl.Color(0.0f, 0.0f, 0.0f);
+                                }
+                                else
+                                {
+                                    gl.Color(0.5f, 0.5f, 0.5f);
+                                }
+
+                                foreach (int ind in indices)
+                                {
+                                    Node n = MainWindowViewModel.Nodes_cortex[ind];
+
+                                    gl.Vertex(n.getPosition());
+                                }
+                            }
+                        }
+                    }
+
+                    gl.End();
+                }
+            }
+
+            DrawAxis(gl);
+        }
+
+        
 
         // 키보드 입력 정보
         private void OnKeyDownHandler(object sender, KeyEventArgs e)

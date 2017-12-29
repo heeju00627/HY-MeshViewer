@@ -24,12 +24,10 @@
             <RowDefinition Name="secondRow" Height="25" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" />
-            <ColumnDefinition Width="150" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <DockPanel Grid.Row="0" Grid.ColumnSpan="3">
+        <DockPanel Grid.Row="0">
             <Menu Name="MainMenu" DockPanel.Dock="Top" >    
                 <MenuItem Name="menuFile" Header="File">
                     <MenuItem Name="submenuOpen" Header="Open" Command="{Binding OpenCommand}"/>
@@ -51,7 +49,7 @@
             </Menu>
         </DockPanel>
 
-        <DockPanel Grid.Row="1" Grid.ColumnSpan="3">
+        <DockPanel Grid.Row="1">
             <ToolBarTray Name="Toolbar" Visibility="Visible" DockPanel.Dock="Top">
                 <ToolBar>
                     <Button Command="Open" ToolTip="Open">
@@ -130,9 +128,8 @@
 
             <Grid Name="ViewerControl" Visibility="Visible">
                 <Grid.RowDefinitions>
-                    <RowDefinition Name="zeroViewerRow" Height="18" />
+                    <RowDefinition Name="zeroViewerRow" Height="*" />
                     <RowDefinition Name="firstViewerRow" Height="*" />
-                    <RowDefinition Name="secondViewerRow" Height="18" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -145,7 +142,7 @@
                     </TransformGroup>
                 </Grid.LayoutTransform>
 
-                <DockPanel Grid.Row="1" Grid.Column="0">
+                <DockPanel Grid.Row="0" Grid.Column="0">
                     <Grid Name="content1" Background="White">
                         <sharpGL:OpenGLControl Name="openGlControl1"
                             OpenGLDraw="OpenGLControl_OpenGLDraw1" OpenGLInitialized="OpenGLControl_OpenGLInitialized1"
@@ -156,7 +153,7 @@
                     </Grid>
                 </DockPanel>
 
-                <DockPanel Grid.Row="1" Grid.Column="1">
+                <DockPanel Grid.Row="1" Grid.Column="0">
                     <Grid Name="content2" Background="White">
                         <sharpGL:OpenGLControl Name="openGlControl2"
                             OpenGLDraw="OpenGLControl_OpenGLDraw2" OpenGLInitialized="OpenGLControl_OpenGLInitialized2"
@@ -166,12 +163,23 @@
                                                MouseRightButtonUp="OpenGlControl_MouseRightButtonUp"/>
                     </Grid>
                 </DockPanel>
-            </Grid>
 
+                <DockPanel Grid.Row="1" Grid.RowSpan="1" Grid.Column="1">
+                    <Grid Name="content3" Background="White">
+                        <sharpGL:OpenGLControl Name="openGlControl3"
+                            OpenGLDraw="OpenGLControl_OpenGLDraw3" OpenGLInitialized="OpenGLControl_OpenGLInitialized3"
+                            DrawFPS="True" RenderContextType="FBO"
+                            MouseMove="OpenGlControl_MouseMove" MouseLeftButtonDown="OpenGlControl_MouseLeftButtonDown"
+                            MouseLeftButtonUp="OpenGlControl_MouseLeftButtonUp" MouseRightButtonDown="OpenGlControl_MouseRightButtonDown"
+                            MouseRightButtonUp="OpenGlControl_MouseRightButtonUp" Margin="0,-1,0.4,0.4"
+                            />
+                    </Grid>
+                </DockPanel>
+            </Grid>
         </DockPanel>
 
 
-        <DockPanel Name="Statusbar" Visibility="Visible" Grid.Row="2" Grid.ColumnSpan="3" >
+        <DockPanel Name="Statusbar" Visibility="Visible" Grid.Row="2">
             <StatusBar DockPanel.Dock="Top">
                 <StatusBarItem>
                     <TextBlock Name="Position" Text="{Binding Path=MousePosition}"/>
